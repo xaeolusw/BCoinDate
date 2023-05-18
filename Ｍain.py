@@ -2,17 +2,27 @@
 def get_distance(addr1, addr2):
     x1, y1 = addr1
     x2, y2 = addr2
-    return (((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
+    distance = (((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5)
+    print(f"地址{addr1}和{addr2}之间的距离是{distance}吉米") 
+    return distance
 
-# 定义地址坐标
-BeginAddr = (3066, 4081)
-TargetAddr = (2520, 3370)
-#EndAddr = (2415, 3185)
+# 拉格朗日的坐标为(X,Y),每一小格(基地、前哨所在单位)在坐标上再细分为10，如(3066, 4081)可以理解为(306.6, 408.1)。
+# 拉格朗日的曲率落点选择：自动计算与坐标所在小格4个顶点的距离，最近的为曲率落点。
+# 获取起飞坐标曲率到目标坐标的曲率落点
+def get_placement(begin_addr, target_addr):
+    angle = [(target_addr[0]//10*10,(target_addr[1]//10*10) + 10),(target_addr[0]//10*10,target_addr[1]//10*10),(target_addr[0]//10*10+10,target_addr[1]//10*10+10),(target_addr[0]//10*10+10,target_addr[1]//10*10)] #定义4地址列表，用于存放目标点4个顶点的坐标
 
-# 测试两个地址之间的距离
-distance = get_distance(BeginAddr, TargetAddr) 
-print(f"地址{BeginAddr}和{TargetAddr}之间的距离是{distance}吉米") 
+    distance = [get_distance(begin_addr, target_addr),get_distance(begin_addr, angle[0]),get_distance(begin_addr, angle[1]),get_distance(begin_addr, angle[2]),get_distance(begin_addr, angle[3])] #定义5数值列表，用于存放起飞点到目标点和目标点4个角的距离
+    
+    #获取distance中最小值的索引，即为曲率落点。
+    return target_addr,distance.index(min(distance[1:4]))    #返回目标所在小格左下角坐标和曲率落点角的索引，1为左上角，2为左下角，3为右上角，4为右下角。  
+        
+begin_addr = (3094, 4063) #起飞坐标
+target_addr = (1975,1455) #目标坐标
 
+print(get_placement(begin_addr, target_addr))
+
+exit()
 
 #2. 根据斜率求直线方程:
 def get_line_equation(Begin, Target, x = 0, y = 0):
