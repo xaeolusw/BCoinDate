@@ -1,4 +1,5 @@
 import time as t
+import pandas as pd
 
 # 计算两个坐标之间的距离
 def get_distance(addr1, addr2):
@@ -23,15 +24,12 @@ def get_placement(begin_addr, target_addr):
     print(f"曲率落点所在小格的左下角坐标为{angle[1]},落点角为{distance.index(min(distance[1:4]))}。(注：1为左上角，2为左下角，3为右上角，4为右下角)")
     #return angle[1],distance.index(min(distance[1:4]))      #返回目标所在小格左下角坐标和曲率落点角的索引，1为左上角，2为左下角，3为右上角，4为右下角。  
         
-def get_outpost_addr(begin_addr, target_addr):    #通过设置前哨曲率坐标的X或者Y获取前哨曲率坐标
+def get_outpost_addr(begin_addr, target_addr,outpost_addr_x = 0,outpost_addr_y = 0):    #通过设置前哨曲率坐标的X或者Y获取前哨曲率坐标
     x1, y1 = begin_addr
     x2, y2 = target_addr
        
     k = (y2 - y1) / (x2 - x1)   #斜率k = (y2 - y1)/(x2 - x1)
     b = y1 - k * x1             #斜率公式 y = kx + b, b = y - kx
-
-    outpost_addr_x = 0  #前哨曲率坐标的X
-    outpost_addr_y = 0  #前哨曲率坐标的Y
 
     while outpost_addr_x == 0 and outpost_addr_y == 0 :
         outpost_addr_x = int(input("请输入前哨的X坐标: "))
@@ -47,6 +45,13 @@ def get_outpost_addr(begin_addr, target_addr):    #通过设置前哨曲率坐�
 
 def get_need_time(distance,speed):  #通过设置距离和速度获取需要的时间，以分钟为单位
     return (distance * 10000)/speed
+
+
+pd.set_option('expand_frame_repr', False)  # 当列太多时显示不清楚
+df = pd.read_csv('/Users/aeolus/PythonProjects/BCoinDate/data/database.csv', encoding='utf8', parse_dates=['user_name'], low_memory=False)  # 从csv文件中读取数据
+
+print(df)
+exit()
 
 begin_addr = (3094, 4063) #起飞坐标
 target_addr = (1975,1455) #目标坐标
