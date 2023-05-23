@@ -19,7 +19,7 @@ def get_k_b(addr1,addr2):
     return k,b
 
           
-def get_outpost_addr(begin_addr, target_addr,outpost_addr_x = 0,outpost_addr_y = 0):    #通过设置起点坐标、目标坐标和前哨的坐标X或者Y，获取前哨的坐标。     
+def get_outpost_addr(begin_addr, target_addr,outpost_addr_x,outpost_addr_y):    #通过设置起点坐标、目标坐标和前哨的坐标X或者Y，获取前哨的坐标。     
     k,b = get_k_b(begin_addr,target_addr)                                             #获取曲率线的斜率和截距。
    
     while outpost_addr_x == 0 and outpost_addr_y == 0 :     #如果前哨坐标x和y都为0，则输入坐标x或y。
@@ -59,7 +59,7 @@ def point_position(begin_addr, outpost_addr, target_addr):
 
     if y == k * x + b:
         y = k * x + b
-        return f'空投位置为({x},{y})，攻击目标{target_addr}在曲率线上'
+        return f'空投降落位置为({x},{y})，攻击目标{target_addr}在曲率线上'
     elif y > k * x + b:
         y = k * x + b
         return f'空投降落位置为({x},{y})，攻击目标{target_addr}在曲率线上方。'
@@ -72,7 +72,7 @@ def get_begin_addr(target_addr,outpost_addr,begin_addr_x):    #通过设置前�
     
     begin_addr_y = k * begin_addr_x + b
     print(f"起飞坐标修正为({begin_addr_x},{begin_addr_y})")
-    return begin_addr_x,begin_addr_y
+    return int(begin_addr_x),begin_addr_y
     
 def get_need_time(distance,speed):  #通过设置距离和速度获取需要的时间，以分钟为单位
     return (distance * 10000)/speed
@@ -90,20 +90,6 @@ df = pd.read_csv(
 
 print(df)
 
-i = 0
-while i < df.shape[0] :
-    print(df[['user_name']],df['outpost_addr'])
-    # df['outpost_addr'][i] = (2000,2000)
-    # print(df['outpost_addr'][i])
-    # print(i)
-    i += 1
-#介绍一下Series，它是一种类似于一维数组的对象，由一组数据（各种NumPy数据类型）以及一组与之相关的数据标签（即索引）组成。
-exit()
-
-
-target_addr = (1125,3104) #目标坐标
-
-begin_addr = [(1600, 3239),(1600, 3241)] #起飞坐标
 base_addr = [(3035,4075),(3035,4095)]      #设置基地坐标
 
 outpost_addr = []
@@ -114,6 +100,28 @@ add_distance = [0,0]
 add_speed = [0,0]
 add_need_time = [0,0]
 end_time = t.strptime("2013-05-22 17:00:00","%Y-%m-%d %H:%M:%S")    #设置到达时间。
+
+i = 0
+while i < df.shape[0] :
+    print(df['user_name'][i])
+    begin_addr = df.loc[i,'begin_addr_x'],df.loc[i,'begin_addr_y'] #起飞坐标
+    target_addr = df.loc[i,'target_addr_x'],df.loc[i,'target_addr_y'] #目标坐标
+    outpost_addr = df.loc[i,'outpost_addr_x'],df.loc[i,'outpost_addr_y']
+
+    outpost_addr = get_outpost_addr(begin_addr, target_addr,outpost_addr[0],outpost_addr[1])
+    #获取前哨坐标,然后获取前哨曲率坐标
+    
+    outpost_addr = get_placement(begin_addr,outpost_addr) 
+    
+    print(point_position(begin_addr, outpost_addr, target_addr))
+    begin_addr = get_begin_addr(target_addr, outpost_addr,begin_addr[0]) #更新起飞坐标
+    print(point_position(begin_addr, outpost_addr, target_addr))
+        
+    i += 1
+exit()
+
+
+
 
 for i in range(0,2):
     x = 0
