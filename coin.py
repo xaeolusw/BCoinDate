@@ -612,3 +612,4 @@ instId	       String	否	     产品ID
 # 返回结果示例：{"status":"ok","ch":"market.btcusdt.detail.merged","ts":1583810974164,"tick":{"amount":71311.94804854663,"open":8082.13,"close":7890.19,"high":8082.14,"id":210146022322,"count":561789,"low":7638.0,"version":210146022322,"ask":[7890.98,0.58188],"vol":5.587285592033827E8,"bid":[7888.83,0.061314]}}
 
 # 币安：https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT
+
