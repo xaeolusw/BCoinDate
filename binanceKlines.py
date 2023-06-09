@@ -95,8 +95,8 @@ symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
 # =====抓取数据开始结束时间
-start_time = '2022-03-01 00:00:00'
-end_time = '2022-12-01 00:00:00'
+start_time = '2022-12-01 00:00:00'
+end_time = '2023-06-08 23:59:00'
 # end_time = str(pd.to_datetime(start_time) + timedelta(days=1))
 
 for symbol in symbol_list:
