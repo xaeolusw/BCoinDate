@@ -122,6 +122,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 # =====获取前一天永续合约、交割合约数据
 # =====设定获取的时间间隔参数
+error_list = []
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
 # =====抓取数据开始结束时间
@@ -154,9 +155,15 @@ for instType in instType_list:
         
 
 # =====获取前一天币币数据
+print(f'获取{start_time} 至 {end_time}币币数据')
 instType = 'SPOT'
 symbol_list = ['BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'] 
 
 for symbol in symbol_list:
     for time_interval in time_interval_list:
-        get_okex_klines(symbol, time_interval, start_time, end_time)
+        try:
+            get_okex_klines(symbol, time_interval, start_time, end_time)
+        except Exception as e:
+            print(e)
+            error_list.append('_'.join([okex.id, symbol, time_interval]))
+

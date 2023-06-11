@@ -2,7 +2,7 @@ import pandas as pd
 import ccxt
 import time
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
@@ -92,29 +92,50 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
    
 
 # =====设定参数
-symbol_list = ['BTCUSDT','ETHUSDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+error_list = []
+symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
-# =====抓取数据开始结束时间
-start_time = '2023-06-09 00:00:00'
-end_time = '2023-08-19 23:59:00'
-# end_time = str(pd.to_datetime(start_time) + timedelta(days=1))
+# # =====选择开始、结束时间抓取数据
+# start_time = '2023-06-09 00:00:00'
+# end_time = '2023-06-10 23:59:00'
 
-# for symbol in symbol_list:
-#     for time_interval in time_interval_list:
-#         get_binance_klines(symbol, time_interval, start_time, end_time)
+# while start_time < end_time :
+#     temp_time = str(pd.to_datetime(end_time) - timedelta(days=30))
+
+#     if temp_time > start_time :
+#         for symbol in symbol_list:
+#             for time_interval in time_interval_list:
+#                 try:
+#                     get_binance_klines(symbol, time_interval, temp_time, end_time)
+#                 except Exception as e:
+#                     print(e)
+#                     error_list.append([symbol, time_interval, temp_time, end_time])
+#         end_time = temp_time
+#     else:
+#         for symbol in symbol_list:
+#             for time_interval in time_interval_list:
+#                 try:
+#                     get_binance_klines(symbol, time_interval, start_time, end_time)
+#                 except Exception as e:
+#                     print(e)
+#                     error_list.append([symbol, time_interval, start_time, end_time])
+#         break
 
 
-while start_time < end_time :
-    temp_time = str(pd.to_datetime(end_time) - timedelta(days=30))
+# =====每天抓取数据
+start_time = datetime.now() - timedelta(days=2)
+end_time = start_time.strftime("%Y-%m-%d") + ' 23:59:00'
+start_time = start_time.strftime("%Y-%m-%d") + ' 00:00:00'
 
-    if temp_time > start_time :
-        for symbol in symbol_list:
-            for time_interval in time_interval_list:
-                get_binance_klines(symbol, time_interval, temp_time, end_time)
-        end_time = temp_time
-    else:
-        for symbol in symbol_list:
-            for time_interval in time_interval_list:
-                get_binance_klines(symbol, time_interval, start_time, end_time)
-        break
+print(f'获取{start_time} 至 {end_time}数据')
+
+for symbol in symbol_list:
+    for time_interval in time_interval_list:
+        try:
+            get_binance_klines(symbol, time_interval, start_time, end_time)
+        except Exception as e:
+            print(e)
+            error_list.append('_'.join([binance.id, symbol, time_interval]))
+
+print(error_list)
