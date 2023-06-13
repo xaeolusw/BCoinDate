@@ -46,21 +46,21 @@ while True:
     df = pd.DataFrame(requests.get('https://dapi.binance.com/dapi/v1/exchangeInfo').json()['symbols'])
     df = df[['symbol','baseAsset','contractType','contractStatus']]
     df = df[df['contractStatus'] == 'TRADING']
-    #df = df[df['contractType'] != 'PERPETUAL'].reset_index(drop=True)
+    df = df[df['contractType'] != 'PERPETUAL'].reset_index(drop=True)
     df = df[['symbol','baseAsset']]
 
     df = df.rename(columns={'symbol':'future','baseAsset':'spot'})
     df['spot'] = df['spot'] + 'USDT'
-    df['spot_price'] = df['spot'].apply(get_spot_price)
-    df['spot_price'] = df['spot_price'].astype(float)
     df['future_price'] = df['future'].apply(get_future_price)
     df['future_price'] = df['future_price'].astype(float)
+    df['spot_price'] = df['spot'].apply(get_spot_price)
+    df['spot_price'] = df['spot_price'].astype(float)
     
     # 计算价差并排序
     df['diff'] = (df['future_price'] - df['spot_price'])/df['spot_price']
     df['diff(%)'] =round(df['diff']*100,2)
     df.sort_values(by='diff(%)', inplace=True,ascending=False)
-    df.set_index('spot',inplace=True)
+    #df.set_index('spot',inplace=True)
 
     print(time.strftime('%Y-%m-%d %H:%M:%S'))
     print('*'*50)
