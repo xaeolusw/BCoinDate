@@ -68,7 +68,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         # =====保存数据到文件
         if df.shape[0] > 0:
             # 根目录，确保该路径存在
-            path = 'D:\PythonProjects\coin_data'
+            path = '/Volumes/USB-DISK/PythonProjects'
 
             # 创建交易所文件夹
             path = os.path.join(path, okex.id)
@@ -126,9 +126,9 @@ error_list = []
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
 # =====抓取数据开始结束时间
-end_time = datetime.now() - timedelta(days=1)
-end_time = end_time.strftime("%Y-%m-%d") + ' 00:00:00'
-start_time = str(pd.to_datetime(end_time) - timedelta(days=1))
+end_time = datetime.now() - timedelta(days=1)     #days=1代表前一天，days=0代表当天,如此类推
+start_time = end_time.strftime("%Y-%m-%d") + ' 00:00:00'
+end_time = end_time.strftime("%Y-%m-%d") + ' 23:59:00'
 print(f'获取{start_time} 至 {end_time}合约数据')
 
 # =====设定获取的交易对参数

@@ -64,7 +64,7 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             # =====保存数据到文件
             if df.shape[0] > 0:
                 # 根目录，确保该路径存在
-                path = 'D:\PythonProjects\coin_data'
+                path = '/Volumes/USB-DISK/PythonProjects'
 
                 # 创建交易所文件夹
                 path = os.path.join(path, binance.id)
@@ -97,7 +97,7 @@ symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']  #'BTCUSDT','ETHUSDT','E
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
 # # =====选择开始、结束时间抓取数据
-# start_time = '2023-06-09 00:00:00'
+# start_time = '2023-06-10 00:00:00'
 # end_time = '2023-06-10 23:59:00'
 
 # while start_time < end_time :
@@ -124,10 +124,13 @@ time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m
 
 
 # =====每天抓取数据
-start_time = datetime.now() - timedelta(days=2)
+start_time = datetime.now() - timedelta(days=1)
+# print(start_time)
 end_time = start_time.strftime("%Y-%m-%d") + ' 23:59:00'
+# print(end_time)
 start_time = start_time.strftime("%Y-%m-%d") + ' 00:00:00'
-
+# print(start_time)
+# exit()
 print(f'获取{start_time} 至 {end_time}数据')
 
 for symbol in symbol_list:
