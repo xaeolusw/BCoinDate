@@ -45,9 +45,11 @@ def get_spot_price(symbol):
 while True: 
     df = pd.DataFrame(requests.get('https://dapi.binance.com/dapi/v1/exchangeInfo').json()['symbols'])
     df = df[['symbol','baseAsset','contractType','contractStatus']]
-    df = df[df['contractStatus'] == 'TRADING']
-    df = df[df['contractType'] != 'PERPETUAL'].reset_index(drop=True)
-    df = df[['symbol','baseAsset']]
+    df = df[df['contractStatus'] == 'TRADING']  # 只选取交易中的合约
+    df = df[df['contractType'] != 'PERPETUAL'].reset_index(drop=True)   # 只选取有交割日期的合约
+    #df = df[df['contractType'] == 'CURRENT_QUARTER'].reset_index(drop=True)   # 只选取当季交割日期的合约
+    #df = df[df['contractType'] == 'NEXT_QUARTER'].reset_index(drop=True)   # 只选取次季交割日期的合约
+    #df = df[['symbol','baseAsset']]
 
     df = df.rename(columns={'symbol':'future','baseAsset':'spot'})
     df['spot'] = df['spot'] + 'USDT'
