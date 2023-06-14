@@ -92,17 +92,17 @@ GET /dapi/v1/time
             ],
             "liquidationFee": "0.010000",   // 强平费率
             "marketTakeBound": "0.30",  // 市价吃单(相对于标记价格)允许可造成的最大价格偏离比例
-            "symbol": "BTCUSD_200925", // 交易对
+            "symbol": "BTCUSD_200925", // 交易对  #有需要
             "pair": "BTCUSD",   // 标的交易对
             "contractType": "CURRENT_QUARTER",   // 合约类型
             "deliveryDate": 1601020800000,
             "onboardDate": 1590739200000,
-            "contractStatus": "TRADING", // 交易对状态
-            "contractSize": 100,     //
-            "quoteAsset": "USD", // 报价币种
-            "baseAsset": "BTC",  // 标的物
-            "marginAsset": "BTC",   // 保证金币种
-            "pricePrecision": 1,   // 价格小数点位数(仅作为系统精度使用，注意同tickSize 区分)
+            "contractStatus": "TRADING", // 交易对状态 #有需要
+            "contractSize": 100,     //单张合约金额 #有需要
+            "quoteAsset": "USD", // 报价币种 #有需要
+            "baseAsset": "BTC",  // 标的物 #有需要
+            "marginAsset": "BTC",   // 保证金币种 #有需要
+            "pricePrecision": 1,   // 价格小数点位数(仅作为系统精度使用，注意同tickSize 区分) #有需要
             "quantityPrecision": 0, // 数量小数点位数(仅作为系统精度使用，注意同stepSize 区分)
             "baseAssetPrecision": 8,
             "quotePrecision": 8,

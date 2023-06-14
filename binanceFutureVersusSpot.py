@@ -45,11 +45,13 @@ def get_spot_price(symbol):
 while True: 
     df = pd.DataFrame(requests.get('https://dapi.binance.com/dapi/v1/exchangeInfo').json()['symbols'])
     df = df[['symbol','baseAsset','contractType','contractStatus']]
-    df = df[df['contractStatus'] == 'TRADING']  # 只选取交易中的合约
-    df = df[df['contractType'] != 'PERPETUAL'].reset_index(drop=True)   # 只选取有交割日期的合约
-    #df = df[df['contractType'] == 'CURRENT_QUARTER'].reset_index(drop=True)   # 只选取当季交割日期的合约
-    #df = df[df['contractType'] == 'NEXT_QUARTER'].reset_index(drop=True)   # 只选取次季交割日期的合约
-    #df = df[['symbol','baseAsset']]
+    df = df[(df['contractStatus'] == 'TRADING') & (df['contractType'] != 'PERPETUAL') & (df['contractType'] != 'CURRENT_QUARTER')]   # 只选取特定条件的合约
+    # df['contractStatus'] == 'TRADING'  # 只选取交易中的合约
+    # df['contractType'] == 'PERPETUAL' # 只选取永续合约
+    # df['contractType'] == 'CURRENT_QUARTER' # 只选取当季交割日期的合约
+    # df['contractType'] == 'NEXT_QUARTER' # 只选取次季交割日期的合约
+    
+    df = df[['symbol','baseAsset']]
 
     df = df.rename(columns={'symbol':'future','baseAsset':'spot'})
     df['spot'] = df['spot'] + 'USDT'
@@ -60,9 +62,9 @@ while True:
     
     # 计算价差并排序
     df['diff'] = (df['future_price'] - df['spot_price'])/df['spot_price']
-    df['diff(%)'] =round(df['diff']*100,2)
-    df.sort_values(by='diff(%)', inplace=True,ascending=False)
-    #df.set_index('spot',inplace=True)
+    df['diff(%)'] = round(df['diff']*100,2)
+    df.sort_values(by='diff(%)', inplace=True, ascending=False)
+    df.set_index('future',inplace=True)
 
     print(time.strftime('%Y-%m-%d %H:%M:%S'))
     print('*'*50)
