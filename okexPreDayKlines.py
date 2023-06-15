@@ -42,8 +42,8 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         
         # print(len(kline_data))
         if len(kline_data) > 0:
-            df = pd.DataFrame(kline_data, dtype=float)  # 将数据转换为dataframe #缺少这两行代码
-            df_list.append(df)  #缺少这两行代码
+            df = pd.DataFrame(kline_data, dtype=float)  # 将数据转换为dataframe
+            df_list.append(df)  
         
             end_time_since = kline_data[-1][0]  # 更新since，为下次循环做准备
             all_kline_data += kline_data
@@ -68,7 +68,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         # =====保存数据到文件
         if df.shape[0] > 0:
             # 根目录，确保该路径存在
-            path = '/Volumes/USB-DISK/PythonProjects'
+            path = '/Volumes/USB-DISK/PythonProjects/coin_data'
 
             # 创建交易所文件夹
             path = os.path.join(path, okex.id)
@@ -126,7 +126,7 @@ error_list = []
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
 # =====抓取数据开始结束时间
-end_time = datetime.now() - timedelta(days=1)     #days=1代表前一天，days=0代表当天,如此类推
+end_time = datetime.now() - timedelta(days=2)     #days=1代表前一天，days=0代表当天,如此类推
 start_time = end_time.strftime("%Y-%m-%d") + ' 00:00:00'
 end_time = end_time.strftime("%Y-%m-%d") + ' 23:59:00'
 print(f'获取{start_time} 至 {end_time}合约数据')
@@ -167,3 +167,8 @@ for symbol in symbol_list:
             print(e)
             error_list.append('_'.join([okex.id, symbol, time_interval]))
 
+if len(error_list) > 0:
+    print('以下数据抓取失败：')
+    print(error_list)
+else:
+    print('数据抓取成功！')

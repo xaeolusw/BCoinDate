@@ -64,7 +64,7 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             # =====保存数据到文件
             if df.shape[0] > 0:
                 # 根目录，确保该路径存在
-                path = '/Volumes/USB-DISK/PythonProjects'
+                path = '/Volumes/USB-DISK/PythonProjects/coin_data'
 
                 # 创建交易所文件夹
                 path = os.path.join(path, binance.id)
@@ -124,7 +124,7 @@ time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m
 
 
 # =====每天抓取数据
-start_time = datetime.now() - timedelta(days=1)
+start_time = datetime.now() - timedelta(days=0) #days=1代表前一天，days=0代表当天,如此类推
 # print(start_time)
 end_time = start_time.strftime("%Y-%m-%d") + ' 23:59:00'
 # print(end_time)
@@ -141,4 +141,8 @@ for symbol in symbol_list:
             print(e)
             error_list.append('_'.join([binance.id, symbol, time_interval]))
 
-print(error_list)
+if len(error_list) > 0:
+    print('以下数据抓取失败：')
+    print(error_list)
+else:
+    print('******数据抓取成功！******')
