@@ -68,7 +68,9 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             # =====保存数据到文件
             if df.shape[0] > 0:
                 # 根目录，确保该路径存在
-                path = '/Volumes/USB-DISK/PythonProjects/coin_data'
+                path = 'D:/PythonProjects/coin_data'
+                #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
+                #Windows系统下的路径:'D:/PythonProjects/coin_data'
 
                 # 创建交易所文件夹
                 path = os.path.join(path, binance.id)
@@ -146,7 +148,9 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         # =====保存数据到文件
         if df.shape[0] > 0:
             # 根目录，确保该路径存在
-            path = '/Volumes/USB-DISK/PythonProjects/coin_data'
+            path = 'D:/PythonProjects/coin_data'
+            #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
+            #Windows系统下的路径:'D:/PythonProjects/coin_data'
 
             # 创建交易所文件夹
             path = os.path.join(path, okex.id)
@@ -175,103 +179,107 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 # =====设定参数
 error_list = []
-symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+binance_symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+okx_symbol_list = ['BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
 time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
-
-# # =====选择开始、结束时间抓取数据
-# start_time = '2023-06-10 00:00:00'
-# end_time = '2023-06-10 23:59:00'
-
-# while start_time < end_time :
-#     temp_time = str(pd.to_datetime(end_time) - timedelta(days=30))
-
-#     if temp_time > start_time :
-#         for symbol in symbol_list:
-#             for time_interval in time_interval_list:
-#                 try:
-#                     get_binance_klines(symbol, time_interval, temp_time, end_time)
-#                 except Exception as e:
-#                     print(e)
-#                     error_list.append([symbol, time_interval, temp_time, end_time])
-#         end_time = temp_time
-#     else:
-#         for symbol in symbol_list:
-#             for time_interval in time_interval_list:
-#                 try:
-#                     get_binance_klines(symbol, time_interval, start_time, end_time)
-#                 except Exception as e:
-#                     print(e)
-#                     error_list.append([symbol, time_interval, start_time, end_time])
-#         break
-
-# while start_time < end_time :
-#     temp_time = str(pd.to_datetime(end_time) - timedelta(days=1))
-
-#     if temp_time > start_time :
-#         for symbol in symbol_list:
-#             for time_interval in time_interval_list:
-#                 get_okex_klines(symbol, time_interval, temp_time, end_time)
-#         end_time = temp_time
-#     else:
-#         for symbol in symbol_list:
-#             for time_interval in time_interval_list:
-#                 get_okex_klines(symbol, time_interval, start_time, end_time)
-#         break
-
-
-
-# =====每天抓取数据
-end_time = datetime.now() - timedelta(days=1) #days=1代表前一天，days=0代表当天,如此类推
-start_time = end_time.strftime("%Y-%m-%d") + ' 00:00:00'
-end_time = end_time.strftime("%Y-%m-%d") + ' 23:59:00'
-print(f'获取binance{start_time} 至 {end_time}数据')
-
-for symbol in symbol_list:
-    for time_interval in time_interval_list:
-        try:
-            get_binance_klines(symbol, time_interval, start_time, end_time)
-        except Exception as e:
-            print(e)
-            error_list.append('_'.join([binance.id, symbol, time_interval]))
-
-# =====获取okx前一天币币数据
-print(f'获取okx{start_time} 至 {end_time}币币数据')
 instType = 'SPOT'
-symbol_list = ['BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'] 
+getPreDayDate = False
+start_time = '2023-06-11 00:00:00'
+end_time = '2023-06-15 23:59:00'
 
-for symbol in symbol_list:
-    for time_interval in time_interval_list:
-        try:
-            get_okex_klines(symbol, time_interval, start_time, end_time)
-        except Exception as e:
-            print(e)
-            error_list.append('_'.join([okex.id, symbol, time_interval]))
+if getPreDayDate:
+    # =====每天抓取数据
+    end_time = datetime.now() - timedelta(days=1) #days=1代表前一天，days=0代表当天,如此类推
+    start_time = end_time.strftime("%Y-%m-%d") + ' 00:00:00'
+    end_time = end_time.strftime("%Y-%m-%d") + ' 23:59:00'
+    print(f'获取binance{start_time} 至 {end_time}数据')
 
-# =====抓取数据开始结束时间
-print(f'获取okx{start_time} 至 {end_time}合约数据')
-
-# =====设定获取的交易对参数
-instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
-uly_list = ['BTC-USDT','BTC-USD']
-for instType in instType_list:
-    symbol_list = []
-
-    for uly in uly_list:
-        params = {
-            'instType': instType, #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
-            'uly': uly, #标的指数,适用于交割/永续/期权，如 BTC-USD
-        #'instFamily': 'BTC-USD', #交易品种.适用于交割/永续/期权，如 BTC-USD          
-        } 
-
-        tickers = okex.publicGetMarketTickers(params=params)['data']
-        for ticker in tickers:
-            symbol_list.append(ticker['instId'])
-        #print(symbol_list)
-
-    for symbol in symbol_list:
+    for symbol in binance_symbol_list:
         for time_interval in time_interval_list:
-            get_okex_klines(symbol, time_interval, start_time, end_time)
-        
+            try:
+                get_binance_klines(symbol, time_interval, start_time, end_time)
+            except Exception as e:
+                print(e)
+                error_list.append('_'.join([binance.id, symbol, time_interval]))
+
+    # =====获取okx前一天币币数据
+    print(f'获取okx{start_time} 至 {end_time}币币数据')
+     
+    for symbol in okx_symbol_list:
+        for time_interval in time_interval_list:
+            try:
+                get_okex_klines(symbol, time_interval, start_time, end_time)
+            except Exception as e:
+                print(e)
+                error_list.append('_'.join([okex.id, symbol, time_interval]))
+
+    # =====抓取数据开始结束时间
+    print(f'获取okx{start_time} 至 {end_time}合约数据')
+
+    # =====设定获取的交易对参数
+    instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
+    uly_list = ['BTC-USDT','BTC-USD']
+    for instType in instType_list:
+        symbol_list = []
+
+        for uly in uly_list:
+            params = {
+                'instType': instType, #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
+                'uly': uly, #标的指数,适用于交割/永续/期权，如 BTC-USD
+            #'instFamily': 'BTC-USD', #交易品种.适用于交割/永续/期权，如 BTC-USD          
+            } 
+
+            tickers = okex.publicGetMarketTickers(params=params)['data']
+            for ticker in tickers:
+                symbol_list.append(ticker['instId'])
+            #print(symbol_list)
+
+        for symbol in symbol_list:
+            for time_interval in time_interval_list:
+                get_okex_klines(symbol, time_interval, start_time, end_time)
+else:
+    #=====选择开始、结束时间抓取数据
+    binance_start_time = start_time
+    binance_end_time = end_time
+
+    while binance_start_time < binance_end_time :
+        temp_time = str(pd.to_datetime(binance_end_time) - timedelta(days=30))
+
+        if temp_time > binance_start_time :
+            for symbol in binance_symbol_list:
+                for time_interval in time_interval_list:
+                    try:
+                        get_binance_klines(symbol, time_interval, temp_time, binance_end_time)
+                    except Exception as e:
+                        print(e)
+                        error_list.append([symbol, time_interval, temp_time, binance_end_time])
+            binance_end_time = temp_time
+        else:
+            for symbol in binance_symbol_list:
+                for time_interval in time_interval_list:
+                    try:
+                        get_binance_klines(symbol, time_interval, binance_start_time, binance_end_time)
+                    except Exception as e:
+                        print(e)
+                        error_list.append([symbol, time_interval, binance_start_time, binance_end_time])
+            break
+
+    # =====选择开始、结束时间抓取数据
+    okx_start_time = start_time
+    okx_end_time = end_time
+    while okx_start_time < okx_end_time :
+        temp_time = str(pd.to_datetime(okx_end_time) - timedelta(days=1))
+
+        if temp_time > okx_start_time :
+            for symbol in okx_symbol_list:
+                for time_interval in time_interval_list:
+                    get_okex_klines(symbol, time_interval, temp_time, okx_end_time)
+            okx_end_time = temp_time
+        else:
+            for symbol in okx_symbol_list:
+                for time_interval in time_interval_list:
+                    get_okex_klines(symbol, time_interval, okx_start_time, okx_end_time)
+            break
 
 if len(error_list) > 0:
     print('以下数据抓取失败：')
