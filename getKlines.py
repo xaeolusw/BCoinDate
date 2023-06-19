@@ -69,9 +69,10 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             # =====保存数据到文件
             if df.shape[0] > 0:
                 # 根目录，确保该路径存在
-                path = '/Volumes/USB-DISK/PythonProjects/coin_data'
+                path = r'D:\PythonProjects\coin_data'
+                #path = path.encode('utf-8')#.decode('utf-8')  # 处理中文乱码问题
                 #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
-                #Windows系统下的路径:'D:/PythonProjects/coin_data'
+                #Windows系统下的路径:'D:\PythonProjects\coin_data'
 
                 # 创建交易所文件夹
                 path = os.path.join(path, binance.id)
@@ -149,9 +150,9 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         # =====保存数据到文件
         if df.shape[0] > 0:
             # 根目录，确保该路径存在
-            path = '/Volumes/USB-DISK/PythonProjects/coin_data'
+            path = r'D:\PythonProjects\coin_data'
             #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
-            #Windows系统下的路径:'D:/PythonProjects/coin_data'
+            #Windows系统下的路径:'D:\PythonProjects\coin_data'
 
             # 创建交易所文件夹
             path = os.path.join(path, okex.id)
@@ -180,7 +181,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 # =====设定参数
 df = pd.read_csv(
-    filepath_or_buffer = r'/Volumes/USB-DISK/getKlinesDatabase.csv', 
+    filepath_or_buffer = r'D:\PythonProjects\getKlinesDatabase.csv', #MAC系统下的路径r'/Volumes/USB-DISK/getKlinesDatabase.csv';Windows系统下的路径r'D:\PythonProjects\getKlinesDatabase.csv'
     encoding='utf8', 
     sep=',',
 )  # 从csv文件中读取数据
@@ -206,7 +207,7 @@ end_time = df['end_time'][0]
 
 
 instType = 'SPOT'
-getPreDayDate = False
+getPreDayDate = True
 # start_time = '2023-06-16 00:00:00'
 # end_time = '2023-06-18 23:59:00'
 
@@ -309,3 +310,6 @@ if len(error_list) > 0:
     print(error_list)
 else:
     print('数据抓取成功！')
+    df['start_time'][0] = end_time
+    df['end_time'][0] = end_time
+    df.to_csv(r'D:\PythonProjects\getKlinesDatabase.csv', index=False)
