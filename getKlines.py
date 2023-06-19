@@ -20,6 +20,7 @@ okex = ccxt.okex5({
     'proxies': proxies
 })
 
+
 def get_binance_klines(symbol, time_interval, start_time, end_time):
     start_time_since = binance.parse8601(start_time) #parse8601（），用于将 ISO 8601 格式的时间字符串转换为 Unix 时间戳
     end_time_since = binance.parse8601(end_time)
@@ -68,7 +69,7 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             # =====保存数据到文件
             if df.shape[0] > 0:
                 # 根目录，确保该路径存在
-                path = 'D:/PythonProjects/coin_data'
+                path = '/Volumes/USB-DISK/PythonProjects/coin_data'
                 #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
                 #Windows系统下的路径:'D:/PythonProjects/coin_data'
 
@@ -148,7 +149,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
         # =====保存数据到文件
         if df.shape[0] > 0:
             # 根目录，确保该路径存在
-            path = 'D:/PythonProjects/coin_data'
+            path = '/Volumes/USB-DISK/PythonProjects/coin_data'
             #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
             #Windows系统下的路径:'D:/PythonProjects/coin_data'
 
@@ -178,14 +179,36 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 
 # =====设定参数
+df = pd.read_csv(
+    filepath_or_buffer = r'/Volumes/USB-DISK/getKlinesDatabase.csv', 
+    encoding='utf8', 
+    sep=',',
+)  # 从csv文件中读取数据
+
 error_list = []
-binance_symbol_list = ['BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
-okx_symbol_list = ['BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT']  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
-time_interval_list = ['5m','15m']  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
+binance_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+okx_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+time_interval_list = []  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
+
+for symblo in df['symbol']:
+    binance_symbol_list.append(symblo + 'USDT')
+    okx_symbol_list.append(symblo + '-USDT')
+
+for interval in df['interval']:
+    if interval != '0':
+        time_interval_list.append(interval)
+
+start_time = df['start_time'][0]
+end_time = df['end_time'][0]
+# print(binance_symbol_list,okx_symbol_list,time_interval_list)
+# print(df['start_time'][0],df['end_time'][0])
+# exit()
+
+
 instType = 'SPOT'
 getPreDayDate = False
-start_time = '2023-06-11 00:00:00'
-end_time = '2023-06-15 23:59:00'
+# start_time = '2023-06-16 00:00:00'
+# end_time = '2023-06-18 23:59:00'
 
 if getPreDayDate:
     # =====每天抓取数据
