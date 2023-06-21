@@ -1,7 +1,7 @@
 import pandas as pd
 import ccxt
 import time
-import os,sys
+import os
 from datetime import timedelta, datetime
 
 # =====设定参数
@@ -44,7 +44,7 @@ global_time_interval_list = []  # 其他可以尝试的值：'1m', '5m', '15m', 
 
 global_binance_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
 
-global_okx_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+global_okx_symbol_list = []  #'BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'
 global_okx_instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
 global_okx_uly_list = ['BTC-USDT','BTC-USD']
 
@@ -105,10 +105,10 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
             'interval': time_interval,
             'startTime': start_time_since, #如果未发送 startTime 和 endTime ，默认返回最近的交易。
             'endTime': end_time_since,
-            'limit': 1000,
+            'limit': 1000
         }  
 
-        kline_data = global_binance_exchange.publicGetKlines(params=params,_self=global_binance_exchange)  # 获取数据
+        kline_data = global_binance_exchange.publicGetKlines(params=params)  # type: ignore # 获取数据
 
         # df = pd.DataFrame(kline_data, dtype=float)  # 将数据转换为dataframe #缺少这两行代码
         # df_list = pd.concat([df], ignore_index=True)  #缺少这两行代码
@@ -187,7 +187,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
             'before': start_time_since, #请求此时间戳之后（更新的数据）的分页内容            
         }  
 
-        kline_data = global_okex_exchange.publicGetMarketHistoryCandles(params=params,_self=global_okex_exchange)['data']
+        kline_data = global_okex_exchange.publicGetMarketHistoryCandles(params=params)['data'] # type: ignore
         # for i in range(len(kline_data)):
         #     print(pd.to_datetime(int(kline_data[i][0]), unit='ms'))
         
@@ -250,20 +250,27 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 pre_pre_day = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
 if pre_pre_day == global_update_time:
-    print('更新昨天数据中')
-    global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    getPreDayDate = True
-else:
+    if datetime.now().hour < 8:
+        print('请过８点后再更新昨天数据！')
+        exit()
+    else:
+        print('更新昨天数据中')
+        global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+        getPreDayDate = True
+elif pre_pre_day > global_update_time:
     print('批量更新数据中')
     getPreDayDate = False
+else:
+    print('数据已是最新')
+    exit()
 
-#print(pre_pre_day,global_update_time,getPreDayDate)
-
+# print(pre_pre_day,global_update_time,getPreDayDate)
+# exit()
 #程序开始：
 if getPreDayDate:
     # =====每天抓取数据
-    start_time = df['update_time'][0] + ' 00:00:00'
-    end_time = df['update_time'][0] + ' 23:59:00'
+    start_time = global_update_time + ' 00:00:00'
+    end_time = global_update_time + ' 23:59:00'
     global_instType = 'spot'
     print(f'获取binance{start_time} 至 {end_time}数据')
 
@@ -290,20 +297,20 @@ if getPreDayDate:
     print(f'获取okx{start_time} 至 {end_time}合约数据')
 
     # =====设定获取的交易对参数
-    instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
-    uly_list = ['BTC-USDT','BTC-USD']
-    for instType in instType_list:
+    # instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
+    # uly_list = ['BTC-USDT','BTC-USD']
+    for instType in global_okx_instType_list:
         symbol_list = []
         global_instType = instType
 
-        for uly in uly_list:
+        for uly in global_okx_uly_list:
             params = {
                 'instType': instType, #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
                 'uly': uly, #标的指数,适用于交割/永续/期权，如 BTC-USD
             #'instFamily': 'BTC-USD', #交易品种.适用于交割/永续/期权，如 BTC-USD          
             } 
 
-            tickers = global_okex_exchange.publicGetMarketTickers(params=params, _self=global_okex_exchange)['data']
+            tickers = global_okex_exchange.publicGetMarketTickers(params=params)['data'] # type: ignore
             for ticker in tickers:
                 symbol_list.append(ticker['instId'])
             #print(symbol_list)
@@ -313,23 +320,21 @@ if getPreDayDate:
                 get_okex_klines(symbol, time_interval, start_time, end_time)
 else:
     #=====选择开始、结束时间抓取数据
-    binance_start_time = (datetime.strptime(global_update_time, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d') + ' 00:00:00'
+    start_time = (datetime.strptime(global_update_time, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d') + ' 00:00:00'
     # global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     binance_end_time = global_update_time + ' 23:59:00'
 
-    okx_start_time = binance_start_time
     okx_end_time = binance_end_time
-    if binance_start_time > binance_end_time:
-        print('开始时间大于结束时间，不进行操作！')
-        sys.exit(0)
-    
-    print(f'抓取{binance_start_time}到{binance_end_time}的数据！')
 
-    while binance_start_time < binance_end_time :
+    okx_future_end_time = binance_end_time
+      
+    print(f'抓取binance{start_time}到{binance_end_time}的币币数据！')
+
+    while start_time < binance_end_time :
         temp_time = str(pd.to_datetime(binance_end_time) - timedelta(days=30))
 
-        if temp_time > binance_start_time :
+        if temp_time > start_time :
             for symbol in global_binance_symbol_list:
                 for time_interval in global_time_interval_list:
                     try:
@@ -342,17 +347,19 @@ else:
             for symbol in global_binance_symbol_list:
                 for time_interval in global_time_interval_list:
                     try:
-                        get_binance_klines(symbol, time_interval, binance_start_time, binance_end_time)
+                        get_binance_klines(symbol, time_interval, start_time, binance_end_time)
                     except Exception as e:
                         print(e)
-                        global_error_list.append([symbol, time_interval, binance_start_time, binance_end_time])
+                        global_error_list.append([symbol, time_interval, start_time, binance_end_time])
             break
 
     # =====选择开始、结束时间抓取数据
-    while okx_start_time < okx_end_time :
+    print(f'抓取okx{start_time}到{binance_end_time}的币币数据！')
+
+    while start_time < okx_end_time :
         temp_time = str(pd.to_datetime(okx_end_time) - timedelta(days=1))
 
-        if temp_time > okx_start_time :
+        if temp_time > start_time :
             for symbol in global_okx_symbol_list:
                 for time_interval in global_time_interval_list:
                     get_okex_klines(symbol, time_interval, temp_time, okx_end_time)
@@ -360,8 +367,34 @@ else:
         else:
             for symbol in global_okx_symbol_list:
                 for time_interval in global_time_interval_list:
-                    get_okex_klines(symbol, time_interval, okx_start_time, okx_end_time)
+                    get_okex_klines(symbol, time_interval, start_time, okx_end_time)
             break
+
+    # =====抓取数据开始结束时间
+    print(f'获取okx{start_time} 至 {okx_future_end_time}合约数据')
+
+    # =====设定获取的交易对参数
+    # instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
+    # uly_list = ['BTC-USDT','BTC-USD']
+    for instType in global_okx_instType_list:
+        symbol_list = []
+        global_instType = instType
+
+        for uly in global_okx_uly_list:
+            params = {
+                'instType': instType, #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
+                'uly': uly, #标的指数,适用于交割/永续/期权，如 BTC-USD
+            #'instFamily': 'BTC-USD', #交易品种.适用于交割/永续/期权，如 BTC-USD          
+            } 
+
+            tickers = global_okex_exchange.publicGetMarketTickers(params=params)['data'] # type: ignore
+            for ticker in tickers:
+                symbol_list.append(ticker['instId'])
+            #print(symbol_list)
+
+        for symbol in symbol_list:
+            for time_interval in global_time_interval_list:
+                get_okex_klines(symbol, time_interval, start_time, okx_future_end_time)
 
 if len(global_error_list) > 0:
     print('以下数据抓取失败：')
