@@ -19,8 +19,8 @@ global_okex_exchange = ccxt.okex5({
     'proxies': proxies
 })
     
-global_database_path = ''
-global_file_path = ''
+# global_database_path = ''
+# global_file_path = ''
 
 if os.name == 'nt':
     global_database_path = r'D:\PythonProjects\getKlinesDatabase.csv'
@@ -32,13 +32,6 @@ else:
     print('操作系统不支持')
     exit()
 
-pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
-df = pd.read_csv(
-    filepath_or_buffer = global_database_path, #MAC系统下的路径r'/Volumes/USB-DISK/getKlinesDatabase.csv';Windows系统下的路径r'D:\PythonProjects\getKlinesDatabase.csv'
-    encoding='utf8', 
-    sep=',',
-)  # 从csv文件中读取数据
-
 global_error_list = []
 global_time_interval_list = []  # 其他可以尝试的值：'1m', '5m', '15m', '30m', '1H', '2H', '1D', '1W', '1M', '1Y'
 
@@ -47,6 +40,13 @@ global_binance_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
 global_okx_symbol_list = []  #'BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'
 global_okx_instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
 global_okx_uly_list = ['BTC-USDT','BTC-USD']
+
+pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
+df = pd.read_csv(
+    filepath_or_buffer = global_database_path, #MAC系统下的路径r'/Volumes/USB-DISK/getKlinesDatabase.csv';Windows系统下的路径r'D:\PythonProjects\getKlinesDatabase.csv'
+    encoding='utf8', 
+    sep=',',
+)  # 从csv文件中读取数据
 
 for symblo in df['symbol']:
     global_binance_symbol_list.append(symblo + 'USDT')
@@ -64,14 +64,13 @@ global_instType = 'SPOT'
 # start_time = '2023-06-16 00:00:00'
 # end_time = '2023-06-18 23:59:00'
 
-def save_data_to_csv(day, df, exchange):
-    global global_file_path, global_instType
+def save_data_to_csv(file_path, exchange, instType, symbol, time_interval, day, df):
     # 创建交易所文件夹
-    file_path = os.path.join(global_file_path, exchange.id)
+    file_path = os.path.join(file_path, exchange.id)
     if os.path.exists(file_path) is False:
         os.mkdir(file_path)
     # 创建spot文件夹
-    file_path = os.path.join(file_path, global_instType)
+    file_path = os.path.join(file_path, instType)
     if os.path.exists(file_path) is False:
         os.mkdir(file_path)
     # 创建交易对文件夹
@@ -91,7 +90,7 @@ def save_data_to_csv(day, df, exchange):
     df.to_csv(file_path, index=False)
 
 def get_binance_klines(symbol, time_interval, start_time, end_time):
-    global global_binance_exchange, global_instType
+    global global_binance_exchange, global_instType, global_file_path
     start_time_since = global_binance_exchange.parse8601(start_time) #parse8601（），用于将 ISO 8601 格式的时间字符串转换为 Unix 时间戳
     end_time_since = global_binance_exchange.parse8601(end_time)
 
@@ -139,7 +138,7 @@ def get_binance_klines(symbol, time_interval, start_time, end_time):
     
             # =====保存数据到文件
             if df.shape[0] > 0:
-                save_data_to_csv(day, df, global_binance_exchange)
+                save_data_to_csv(global_file_path, global_binance_exchange, global_instType, symbol, time_interval, day, df)
                 # # 创建交易所文件夹
                 # file_path = os.path.join(global_file_path, global_binance_exchange.id)
                 # if os.path.exists(file_path) is False:
@@ -218,7 +217,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
    
         # =====保存数据到文件
         if df.shape[0] > 0:
-            save_data_to_csv(day, df, global_okex_exchange)
+            save_data_to_csv(global_file_path, global_binance_exchange, global_instType, symbol, time_interval, day, df)
             # 根目录，确保该路径存在
             #path = r'/Volumes/USB-DISK/PythonProjects/coin_data'
             #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
