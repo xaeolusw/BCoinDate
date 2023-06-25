@@ -217,7 +217,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
    
         # =====保存数据到文件
         if df.shape[0] > 0:
-            save_data_to_csv(global_file_path, global_binance_exchange, global_instType, symbol, time_interval, day, df)
+            save_data_to_csv(global_file_path, global_okex_exchange, global_instType, symbol, time_interval, day, df)
             # 根目录，确保该路径存在
             #path = r'/Volumes/USB-DISK/PythonProjects/coin_data'
             #MAC系统下的路径:'/Volumes/USB-DISK/PythonProjects/coin_data'
