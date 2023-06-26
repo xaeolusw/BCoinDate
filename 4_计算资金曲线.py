@@ -8,9 +8,9 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 # =====导入数据
 df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
 # 选取数据：币种上线10天之后的日期
-t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
-df = df[df['candle_begin_time'] > t]
-df.drop(['volume', 'quote_asset_volume'], axis=1, inplace=True)
+# t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
+# df = df[df['candle_begin_time'] > t]
+df.drop(['volume'], axis=1, inplace=True)
 
 # =====找出下根K线的开盘价
 df['next_open'] = df['open'].shift(-1)  # 下根K线的开盘价
@@ -29,26 +29,27 @@ close_pos_condition = condition1 & condition2
 
 # =====对每次交易进行分组
 df.loc[open_pos_condition, 'start_time'] = df['candle_begin_time']
-df['start_time'].fillna(method='ffill', inplace=True)
+df['start_time'].fillna(method='ffill', inplace=True)   # 开仓时间，取上一个非空值
 df.loc[df['pos'] == 0, 'start_time'] = pd.NaT
 
-
+# print(df[df['start_time'].notnull()])
+# exit()
 # =====开始计算资金曲线
 # ===基本参数
-initial_cash = 1000000  # 初始资金，默认为10000元
+initial_cash = 9000  # 初始资金，默认为10000元
 face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
 slippage = 1 / 1000  # 滑点 ，可以用百分比，也可以用固定值。建议币圈用百分比，股票用固定值
-leverage_rate = 3
+leverage_rate = 3   #杠杆比率
 min_margin_ratio = 1 / 100  # 最低保证金率，低于就会爆仓
-
 
 # ===在开仓时
 # 在open_pos_condition的K线，以开盘价计算买入合约的数量。（当资金量大的时候，可以用本根K线的前5分钟均价）
 df.loc[open_pos_condition, 'contract_num'] = initial_cash * leverage_rate / (face_value * df['open'])
 df['contract_num'] = np.floor(df['contract_num'])  # 对合约张数向下取整
+
 # 开仓价格：理论开盘价加上相应滑点
-df.loc[open_pos_condition, 'open_pos_price'] = df['open'] * (1 + slippage * df['pos'])
+df.loc[open_pos_condition, 'open_pos_price'] = df['open'] * (1 + slippage) * df['pos']    #(1 + slippage * df['pos']) 应该改为(1 + slippage） * df['pos']
 # 开仓之后，要扣除手续费。在初始保证金中扣除
 df['cash'] = initial_cash - df['open_pos_price'] * face_value * df['contract_num'] * c_rate  # 即保证金
 
@@ -103,10 +104,11 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 
 
 # =====删除不必要的数据，并存储
-df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
-         'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', '是否爆仓'],
-        axis=1, inplace=True)
-print(df)
-exit()
+# df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
+        #  'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', '是否爆仓'],
+        # axis=1, inplace=True)
+# print(df)
+# exit()
+df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
 df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
 

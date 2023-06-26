@@ -78,9 +78,10 @@ temp = temp[temp['signal'] != temp['signal'].shift(1)]
 df['signal'] = temp['signal']
 
 # ==删除无关变量
-# df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short'], axis=1, inplace=True)
+df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
 print(df)
-print(df[df['signal'].isna() == False])
+# df = df[df['signal'].isna() == False]   #为什么不删除空值？
+
 # =====将数据存入hdf文件中
 df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')
 # df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/signals.csv', index=False)
