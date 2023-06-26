@@ -50,7 +50,6 @@ df['std'] = df['close'].rolling(n, min_periods=1).std(ddof=0)  # ddof代表标�
 df['upper'] = df['median'] + m * df['std']
 df['lower'] = df['median'] - m * df['std']
 
-
 # ==计算信号
 # 找出做多信号
 condition1 = df['close'] > df['upper']  # 当前K线的收盘价 > 上轨
