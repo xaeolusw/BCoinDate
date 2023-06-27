@@ -80,7 +80,7 @@ df['signal'] = temp['signal']
 # ==删除无关变量
 df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
 print(df)
-# df = df[df['signal'].isna() == False]   #为什么不删除空值？
+# df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值
 
 # =====将数据存入hdf文件中
 df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')

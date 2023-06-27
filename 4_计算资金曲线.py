@@ -49,7 +49,7 @@ df.loc[open_pos_condition, 'contract_num'] = initial_cash * leverage_rate / (fac
 df['contract_num'] = np.floor(df['contract_num'])  # 对合约张数向下取整
 
 # 开仓价格：理论开盘价加上相应滑点
-df.loc[open_pos_condition, 'open_pos_price'] = df['open'] * (1 + slippage) * df['pos']    #(1 + slippage * df['pos']) 应该改为(1 + slippage） * df['pos']
+df.loc[open_pos_condition, 'open_pos_price'] = df['open'] * (1 + slippage * df['pos'])    #是否改为(1 + slippage） * df['pos']？因为卖空时的金额应该小于开盘价，便于成交。
 # 开仓之后，要扣除手续费。在初始保证金中扣除
 df['cash'] = initial_cash - df['open_pos_price'] * face_value * df['contract_num'] * c_rate  # 即保证金
 
@@ -67,11 +67,14 @@ df.loc[close_pos_condition, 'close_pos_fee'] = df['close_pos_price'] * face_valu
 
 # ===计算利润
 # 开仓至今持仓盈亏
-df['profit'] = face_value * df['contract_num'] * (df['close'] - df['open_pos_price']) * df['pos']
+df['profit'] = face_value * df['contract_num'] * (df['close'] - df['open_pos_price']) * df['pos']   #为什么不为df['close_pos_price']?实时盈亏应该是以当前价格计算的。
 df.loc[close_pos_condition, 'profit'] = face_value * df['contract_num'] * (df['close_pos_price'] - df['open_pos_price']) * df['pos']
 # 账户净值
 df['net_value'] = df['cash'] + df['profit']
-
+# net_value_list = df.loc[df['contract_num']>0,'net_value']
+# for value in net_value_list:
+#     print(value)
+# exit()
 
 # ===计算爆仓
 # 至今持仓盈亏最小值
@@ -110,5 +113,5 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 # print(df)
 # exit()
 df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
-df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
+# df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
 
