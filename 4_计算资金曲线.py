@@ -6,7 +6,7 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 
 # =====导入数据
-df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
+df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df')
 # 选取数据：币种上线10天之后的日期
 # t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
 # df = df[df['candle_begin_time'] > t]
@@ -100,7 +100,7 @@ df.loc[df['是否爆仓'] == 1, 'net_value'] = 0
 
 
 # =====计算资金曲线
-df['equity_change'] = df['net_value'].pct_change()
+df['equity_change'] = df['net_value'].pct_change() # 每根K线结束时的资金变动百分比
 df.loc[open_pos_condition, 'equity_change'] = df.loc[open_pos_condition, 'net_value'] / initial_cash - 1  # 开仓日的收益率
 df['equity_change'].fillna(value=0, inplace=True)
 df['equity_curve'] = (1 + df['equity_change']).cumprod()
@@ -112,6 +112,6 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
         # axis=1, inplace=True)
 # print(df)
 # exit()
-df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
-# df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
+# df.to_csv('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.csv')
+df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.h5', key='df', mode='w')
 

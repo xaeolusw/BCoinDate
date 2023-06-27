@@ -4,7 +4,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # =====读入数据
 # symbol = 'BTCUSDT'
-df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT.h5', key='BTCUSDT_15m')
+df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m')
 
 # # 任何原始数据读入都进行一下排序、去重，以防万一
 # df.sort_values(by=['candle_begin_time'], inplace=True)
@@ -29,8 +29,9 @@ df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT.h5'
 # # df = df[df['candle_begin_time'] >= pd.to_datetime('2017-01-01')]
 # df.reset_index(inplace=True, drop=True)
 
-# df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT.h5', key='BTCUSDT_15m', mode='a')
+# df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m', mode='a')
 # exit()
+
 # =====产生交易信号：布林线策略
 # 布林线策略
 # 布林线中轨：n天收盘价的移动平均线                                 #20周期简单移动平均线（SMA）
@@ -83,6 +84,6 @@ print(df)
 # df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值
 
 # =====将数据存入hdf文件中
-df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')
+df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df', mode='w')
 # df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/signals.csv', index=False)
 

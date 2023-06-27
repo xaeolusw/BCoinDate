@@ -247,6 +247,7 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
             # print(filePath)
             # df.to_csv(filePath, index=False)
 
+#手工设置起始时间时以下代码禁止
 pre_pre_day = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
 if pre_pre_day == global_update_time:
     if datetime.now().hour < 8:
@@ -266,6 +267,7 @@ else:
 # print(pre_pre_day,global_update_time,getPreDayDate)
 # exit()
 #程序开始：
+# if False: #手工设置起始时间时使用
 if getPreDayDate:
     # =====每天抓取数据
     start_time = global_update_time + ' 00:00:00'
@@ -322,7 +324,11 @@ else:
     start_time = (datetime.strptime(global_update_time, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d') + ' 00:00:00'
     # global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    binance_end_time = global_update_time + ' 23:59:00'
+    binance_end_time = global_update_time + ' 23:59:59'
+
+    #手工设置起始时间
+    start_time = '2023-06-22 00:00:00'
+    binance_end_time = '2023-06-23 23:59:59'
 
     okx_end_time = binance_end_time
 

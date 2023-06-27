@@ -4,7 +4,7 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 
 # ===导入数据
-df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df')
+df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df')
 
 
 # ===由signal计算出实际的每天持有仓位
@@ -28,5 +28,5 @@ df['pos'].fillna(method='ffill', inplace=True)
 # ===将数据存入hdf文件中
 # 删除无关中间变量
 df.drop(['signal'], axis=1, inplace=True)
-df.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df', mode='w')
+df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df', mode='w')
 
