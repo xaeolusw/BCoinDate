@@ -110,8 +110,8 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 # df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
         #  'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', '是否爆仓'],
         # axis=1, inplace=True)
-# print(df)
-# exit()
+print(df)
+exit()
 # df.to_csv('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.csv')
 df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.h5', key='df', mode='w')
 
