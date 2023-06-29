@@ -326,9 +326,9 @@ else:
     global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     binance_end_time = global_update_time + ' 23:59:59'
 
-    #手工设置起始时间
-    start_time = '2023-06-22 00:00:00'
-    binance_end_time = '2023-06-23 23:59:59'
+    # #手工设置起始时间
+    # start_time = '2023-06-22 00:00:00'
+    # binance_end_time = '2023-06-23 23:59:59'
 
     okx_end_time = binance_end_time
 

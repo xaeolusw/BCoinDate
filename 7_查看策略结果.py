@@ -48,7 +48,7 @@ df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', k
 listDf = pd.DataFrame(["para", "equity_curve"])
 # =====计算交易信号
 for i in range(1, 100):
-    for j in range(2, 3):
+    for j in range(1, 3):
         para = [i * 10, j]
         print(para)
         # listDf["para"] = para
