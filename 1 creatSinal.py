@@ -1,10 +1,18 @@
 import pandas as pd
+import os
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 
-# =====读入数据
-# symbol = 'BTCUSDT'
-df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m')
+# # =====读入数据(首次使用)
+# # symbol = 'BTCUSDT'
+# if os.name == 'nt':
+#     df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+# elif os.name == 'posix':
+#     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+# else:
+#     print('操作系统不支持')
+#     exit()
+    
 
 # # 任何原始数据读入都进行一下排序、去重，以防万一
 # df.sort_values(by=['candle_begin_time'], inplace=True)
@@ -29,8 +37,17 @@ df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', k
 # # df = df[df['candle_begin_time'] >= pd.to_datetime('2017-01-01')]
 # df.reset_index(inplace=True, drop=True)
 
-# df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m', mode='a')
+
+# if os.name == 'nt':
+#     df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m', mode='a')
+# elif os.name == 'posix':
+#     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
+# else:
+#     print('操作系统不支持')
+#     exit()
 # exit()
+
+
 
 # =====产生交易信号：布林线策略
 # 布林线策略
@@ -39,6 +56,16 @@ df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', k
 # 布林线上轨：n天收盘价的移动平均线 - m * n天收盘价的标准差
 # 当收盘价由下向上穿过上轨的时候，做多；然后由上向下穿过中轨的时候，平仓。
 # 当收盘价由上向下穿过下轨的时候，做空；然后由下向上穿过中轨的时候，平仓。
+
+# =====读入数据(除首次外使用)
+# symbol = 'BTCUSDT'
+if os.name == 'nt':
+    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+elif os.name == 'posix':
+    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
+else:
+    print('操作系统不支持')
+    exit()
 
 # ==计算指标
 n = 400
@@ -84,6 +111,11 @@ print(df)
 # df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值
 
 # =====将数据存入hdf文件中
-df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df', mode='w')
 # df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/signals.csv', index=False)
-
+if os.name == 'nt':
+    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df', mode='w')
+elif os.name == 'posix':
+    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')
+else:
+    print('操作系统不支持')
+    exit()

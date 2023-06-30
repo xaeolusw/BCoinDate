@@ -1,11 +1,17 @@
 import pandas as pd
+import os
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 
 # ===导入数据
-df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df')
-
+if os.name == 'nt':
+    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df')
+elif os.name == 'posix':
+    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df')
+else:
+    print('操作系统不支持')
+    exit()
 
 # ===由signal计算出实际的每天持有仓位
 # 在产生signal的k线结束的时候，进行买入
@@ -28,5 +34,11 @@ df['pos'].fillna(method='ffill', inplace=True)
 # ===将数据存入hdf文件中
 # 删除无关中间变量
 df.drop(['signal'], axis=1, inplace=True)
-df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df', mode='w')
 
+if os.name == 'nt':
+    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df', mode='w')
+elif os.name == 'posix':
+    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df', mode='w')
+else:
+    print('操作系统不支持')
+    exit()

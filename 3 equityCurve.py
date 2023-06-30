@@ -1,12 +1,19 @@
 import pandas as pd
 import numpy as np
+import os
 from datetime import timedelta
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 
 # =====导入数据
-df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df')
+if os.name == 'nt':
+    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df')
+elif os.name == 'posix':
+    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
+else:
+    print('操作系统不支持')
+    exit()
 # 选取数据：币种上线10天之后的日期
 # t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
 # df = df[df['candle_begin_time'] > t]
@@ -113,5 +120,11 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 print(df)
 exit()
 # df.to_csv('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.csv')
-df.to_hdf('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.h5', key='df', mode='w')
 
+if os.name == 'nt':
+    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\equity_curve.h5', key='df', mode='w')
+elif os.name == 'posix':
+    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
+else:
+    print('操作系统不支持')
+    exit()

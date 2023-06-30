@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from datetime import timedelta
 from Signals import *
 from Position import *
@@ -13,14 +14,22 @@ para = [1000, 2]
 face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
 slippage = 1 / 1000  # 滑点 ，可以用百分比，也可以用固定值。建议币圈用百分比，股票用固定值
-leverage_rate = 3
+leverage_rate = 3  # 交易所的杠杆倍数。
 min_margin_ratio = 1 / 100  # 最低保证金率，低于就会爆仓
 rule_type = '15T'
 drop_days = 10  # 币种刚刚上线10天内不交易
 
 
 # =====读入数据
-df = pd.read_hdf('D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m')
+if os.name == 'nt':
+    df = pd.read_hdf(r'D:\PythonProjects\BCoinDate\data\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m')
+elif os.name == 'posix':
+    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
+else:
+    print('操作系统不支持')
+    exit()
+
+
 # # 任何原始数据读入都进行一下排序、去重，以防万一
 # # df = df[df['candle_begin_time'] >= pd.to_datetime('2023-01-01')]
 # df.sort_values(by=['candle_begin_time'], inplace=True)
