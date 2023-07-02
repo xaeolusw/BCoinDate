@@ -6,7 +6,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 # # =====读入数据(首次使用)
 # # symbol = 'BTCUSDT'
 # if os.name == 'nt':
-#     df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+#     df = pd.read_hdf(r'D:\PythonProjects\coin_data\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
 # elif os.name == 'posix':
 #     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
 # else:
@@ -39,7 +39,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 
 # if os.name == 'nt':
-#     df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m', mode='a')
+#     df.to_hdf(r'D:\PythonProjects\coin_data\binance_BTCUSDT_15m.h5', key='BTCUSDT_15m', mode='a')
 # elif os.name == 'posix':
 #     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
 # else:
@@ -60,7 +60,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 # =====读入数据(除首次外使用)
 # symbol = 'BTCUSDT'
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+    df = pd.read_hdf(r'D:\PythonProjects\coin_data\binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
 elif os.name == 'posix':
     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
 else:
@@ -113,7 +113,7 @@ print(df)
 # =====将数据存入hdf文件中
 # df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/signals.csv', index=False)
 if os.name == 'nt':
-    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df', mode='w')
+    df.to_hdf(r'D:\PythonProjects\coin_data\signals.h5', key='df', mode='w')
 elif os.name == 'posix':
     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')
 else:

@@ -8,7 +8,7 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # =====导入数据
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df')
+    df = pd.read_hdf(r'D:\PythonProjects\coin_data\pos.h5', key='df')
 elif os.name == 'posix':
     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
 else:
@@ -117,14 +117,16 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 # df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
         #  'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', '是否爆仓'],
         # axis=1, inplace=True)
-print(df)
-exit()
+# print(df)
+# exit()
 # df.to_csv('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.csv')
 
 if os.name == 'nt':
-    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\equity_curve.h5', key='df', mode='w')
+    df.to_hdf(r'D:\PythonProjects\coin_data\equity_curve.h5', key='df', mode='w')
+    df.to_csv(r'D:\PythonProjects\coin_data\equity_curve.csv')
 elif os.name == 'posix':
     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
+    df.to_csv(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
 else:
     print('操作系统不支持')
     exit()

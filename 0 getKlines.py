@@ -23,7 +23,7 @@ global_okex_exchange = ccxt.okex5({
 # global_file_path = ''
 
 if os.name == 'nt':
-    global_database_path = r'D:\PythonProjects\getKlinesDatabase.csv'
+    global_database_path = r'D:\PythonProjects\coin_data\getKlinesDatabase.csv'
     global_file_path = r'D:\PythonProjects\coin_data'
 elif os.name == 'posix':
     global_database_path = r'/Volumes/USB-DISK/getKlinesDatabase.csv'
@@ -249,6 +249,8 @@ def get_okex_klines(symbol, time_interval, start_time, end_time):
 
 #手工设置起始时间时以下代码禁止
 pre_pre_day = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+# print('pre_pre_day:',pre_pre_day,'global_update_time:',global_update_time)
+# exit()
 if pre_pre_day == global_update_time:
     if datetime.now().hour < 8:
         print('请过８点后再更新昨天数据！')
