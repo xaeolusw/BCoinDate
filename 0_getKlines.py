@@ -135,7 +135,7 @@ if getPreDayDate:
 
         for symbol in symbol_list:
             for time_interval in global_time_interval_list:
-                get_okex_klines(symbol, time_interval, start_time, end_time)
+                get_okex_klines(global_okex_exchange, symbol, time_interval, start_time, end_time, global_instType, global_file_path)
 else:
     #=====选择开始、结束时间抓取数据
     start_time = (datetime.strptime(global_update_time, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d') + ' 00:00:00'
@@ -160,7 +160,7 @@ else:
             for symbol in global_binance_symbol_list:
                 for time_interval in global_time_interval_list:
                     try:
-                        get_binance_klines(symbol, time_interval, temp_time, binance_end_time)
+                        get_binance_klines(global_binance_exchange, symbol, time_interval, temp_time, binance_end_time, global_instType, global_file_path)
                     except Exception as e:
                         print(e)
                         global_error_list.append([symbol, time_interval, temp_time, binance_end_time])
@@ -169,7 +169,7 @@ else:
             for symbol in global_binance_symbol_list:
                 for time_interval in global_time_interval_list:
                     try:
-                        get_binance_klines(symbol, time_interval, start_time, binance_end_time)
+                        get_binance_klines(global_binance_exchange, symbol, time_interval, start_time, binance_end_time, global_instType, global_file_path)
                     except Exception as e:
                         print(e)
                         global_error_list.append([symbol, time_interval, start_time, binance_end_time])
@@ -184,12 +184,12 @@ else:
         if temp_time > start_time :
             for symbol in global_okx_symbol_list:
                 for time_interval in global_time_interval_list:
-                    get_okex_klines(symbol, time_interval, temp_time, okx_end_time)
+                    get_okex_klines(global_okex_exchange, symbol, time_interval, temp_time, okx_end_time, global_instType, global_file_path)
             okx_end_time = temp_time
         else:
             for symbol in global_okx_symbol_list:
                 for time_interval in global_time_interval_list:
-                    get_okex_klines(symbol, time_interval, start_time, okx_end_time)
+                    get_okex_klines(global_okex_exchange, symbol, time_interval, start_time, okx_end_time, global_instType, global_file_path)
             break
 
     # =====抓取数据开始结束时间
@@ -216,7 +216,7 @@ else:
 
         for symbol in symbol_list:
             for time_interval in global_time_interval_list:
-                get_okex_klines(symbol, time_interval, start_time, okx_future_end_time)
+                get_okex_klines(global_okex_exchange, symbol, time_interval, start_time, okx_future_end_time, global_instType, global_file_path)
 
 if len(global_error_list) > 0:
     print('以下数据抓取失败：')
