@@ -6,7 +6,7 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # ===导入数据
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df')
+    df = pd.read_hdf(r'D:\PythonProjects\coin_data\signals.h5', key='df')
 elif os.name == 'posix':
     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df')
 else:
@@ -36,7 +36,7 @@ df['pos'].fillna(method='ffill', inplace=True)
 df.drop(['signal'], axis=1, inplace=True)
 
 if os.name == 'nt':
-    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\pos.h5', key='df', mode='w')
+    df.to_hdf(r'D:\PythonProjects\coin_data\pos.h5', key='df', mode='w')
 elif os.name == 'posix':
     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df', mode='w')
 else:

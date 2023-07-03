@@ -6,7 +6,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # 获取数据的路径
 if os.name == 'nt':
-    path = r'/Volumes/USB-DISK/PythonProjects/coin_data/binance/spot/BTCUSDT/5m'  # 改成电脑本地的地址global_database_path = r'D:\PythonProjects\getKlinesDatabase.csv'
+    path = r'D:\PythonProjects\coin_data\binance\spot\BTCUSDT\5m'  # 改成电脑本地的地址global_database_path = r'D:\PythonProjects\getKlinesDatabase.csv'
 elif os.name == 'posix':
     path = r'/Volumes/USB-DISK/PythonProjects/coin_data/binance/spot/BTCUSDT/5m'  # 改成电脑本地的地址
 else:
@@ -36,7 +36,7 @@ data.reset_index(drop=False, inplace=False)
 
 # 导出完整数据
 if os.name == 'nt':
-    data.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_5m.h5' % symbol, key='BTCUSDT_5m', mode='w')
+    data.to_hdf(r'D:\PythonProjects\coin_data\binance_%s_5m.h5' % symbol, key='BTCUSDT_5m', mode='w')
 elif os.name == 'posix':
     data.to_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_5m.h5' % symbol, key='BTCUSDT_5m', mode='w')
 else:
