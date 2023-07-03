@@ -11,14 +11,16 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 # 当收盘价由上向下穿过下轨的时候，做空；然后由下向上穿过中轨的时候，平仓。
 
 # =====读入数据(除首次外使用)
-# symbol = 'BTCUSDT'
+symbol = 'BTCUSDT'
+path = ''
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+    path = 'D:\\PythonProjects\\BCoinDate\\data\\binance_%s_5m.h5'%symbol
 elif os.name == 'posix':
-    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_15m.h5'%symbol
 else:
     print('操作系统不支持')
     exit()
+df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_15m.h5'%symbol, key='%s_15m'%symbol)
 
 # ==计算指标
 n = 400
@@ -60,15 +62,16 @@ df['signal'] = temp['signal']
 
 # ==删除无关变量
 df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
-print(df)
+# print(df)
 # df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值
 
 # =====将数据存入hdf文件中
-# df.to_csv('/Volumes/USB-DISK/PythonProjects/coin_data/signals.csv', index=False)
 if os.name == 'nt':
-    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\signals.h5', key='df', mode='w')
+    path = 'D:\\PythonProjects\\BCoinDate\\data\\%s_signals.h5'%symbol
 elif os.name == 'posix':
-    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df', mode='w')
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/%s_signals.h5'%symbol
 else:
     print('操作系统不支持')
     exit()
+
+df.to_hdf(path, key='df', mode='w')
