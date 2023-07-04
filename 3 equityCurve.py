@@ -8,15 +8,15 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # =====导入数据
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\PythonProjects\coin_data\pos.h5', key='df')
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\pos.h5', key='df')
 elif os.name == 'posix':
-    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
+    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
 else:
     print('操作系统不支持')
     exit()
 # 选取数据：币种上线10天之后的日期
-# t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
-# df = df[df['candle_begin_time'] > t]
+t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
+df = df[df['candle_begin_time'] > t]
 df.drop(['volume'], axis=1, inplace=True)
 
 # =====找出下根K线的开盘价

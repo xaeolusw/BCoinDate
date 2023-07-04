@@ -5,14 +5,21 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # =====读入数据(首次使用)
 # symbol = 'BTCUSDT'
+# if os.name == 'nt':
+#     df = pd.read_hdf('D:\\PythonProjects\\coin_data\\binance_%s_5m.h5'%symbol, key='BTCUSDT_5m')
+# elif os.name == 'posix':
+#     df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_5m.h5'%symbol, key='BTCUSDT_5m')
+# else:
+#     print('操作系统不支持')
+#     exit()
+    
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
 elif os.name == 'posix':
-    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
+    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_5m.h5', key='BTCUSDT_5m')
 else:
     print('操作系统不支持')
     exit()
-    
 
 # 任何原始数据读入都进行一下排序、去重，以防万一
 df.sort_values(by=['candle_begin_time'], inplace=True)
@@ -38,11 +45,26 @@ df = period_df[['candle_begin_time', 'open', 'high', 'low', 'close', 'volume', '
 df.reset_index(inplace=True, drop=True)
 
 
+# if os.name == 'nt':
+#     path = 'D:\\PythonProjects\\coin_data\\binance_%s_%s.h5' % (symbol, '15m')
+#     df.to_hdf(path, key='BTCUSDT_15m', mode='a')
+#     print('转换成功, 转换为%s'%path)
+# elif os.name == 'posix':
+#     path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_%s.h5' % (symbol, '15m')
+#     df.to_hdf(path, key='BTCUSDT_15m')
+#     print('转换成功, 转换为%s'%path)
+# else:
+#     print('操作系统不支持')
+#     exit()
+
 if os.name == 'nt':
-    df.to_hdf(r'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_5m.h5', key='BTCUSDT_15m', mode='a')
+    path = 'D:\\PythonProjects\\coin_data\\binance_BTCUSDT_15m.h5'
+    df.to_hdf(path, key='BTCUSDT_15m', mode='a')
+    print('转换成功, 转换为%s'%path)
 elif os.name == 'posix':
-    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5', key='BTCUSDT_15m')
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5'
+    df.to_hdf(path, key='BTCUSDT_15m')
+    print('转换成功, 转换为%s'%path)
 else:
     print('操作系统不支持')
     exit()
-

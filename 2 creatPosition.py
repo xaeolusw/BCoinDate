@@ -6,7 +6,7 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # ===导入数据
 if os.name == 'nt':
-    df = pd.read_hdf(r'D:\PythonProjects\coin_data\signals.h5', key='df')
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\signals.h5', key='df')
 elif os.name == 'posix':
     df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df')
 else:
