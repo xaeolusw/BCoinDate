@@ -49,6 +49,7 @@ def equity_curve_for_OKEx_USDT_future_next_open(df, slippage=1 / 1000, c_rate=5 
 
     # =====开始计算资金曲线
     initial_cash = 9000  # 初始资金，默认为10000元
+    
     # ===在开仓时
     # 在open_pos_condition的K线，以开盘价计算买入合约的数量。（当资金量大的时候，可以用5分钟均价）
     df.loc[open_pos_condition, 'contract_num'] = initial_cash * leverage_rate / (face_value * df['open'])

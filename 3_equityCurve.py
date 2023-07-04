@@ -8,16 +8,17 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # =====导入数据
 if os.name == 'nt':
-    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\pos.h5', key='df')
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\BTCUSDT_pos.h5', key='df')
 elif os.name == 'posix':
-    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df')
+    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/BTCUSDT_pos.h5', key='df')
 else:
     print('操作系统不支持')
     exit()
-# 选取数据：币种上线10天之后的日期
-t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
-df = df[df['candle_begin_time'] > t]
-df.drop(['volume'], axis=1, inplace=True)
+
+# # 选取数据：币种上线10天之后的日期
+# t = df.iloc[0]['candle_begin_time'] + timedelta(days=10)
+# df = df[df['candle_begin_time'] > t]
+# df.drop(['volume'], axis=1, inplace=True)
 
 # =====找出下根K线的开盘价
 df['next_open'] = df['open'].shift(-1)  # 下根K线的开盘价
@@ -39,8 +40,6 @@ df.loc[open_pos_condition, 'start_time'] = df['candle_begin_time']
 df['start_time'].fillna(method='ffill', inplace=True)   # 开仓时间，取上一个非空值
 df.loc[df['pos'] == 0, 'start_time'] = pd.NaT
 
-# print(df[df['start_time'].notnull()])
-# exit()
 # =====开始计算资金曲线
 # ===基本参数
 initial_cash = 9000  # 初始资金，默认为10000元
@@ -117,16 +116,25 @@ df['equity_curve'] = (1 + df['equity_change']).cumprod()
 # df.drop(['next_open', 'contract_num', 'open_pos_price', 'cash', 'close_pos_price', 'close_pos_fee',
         #  'profit', 'net_value', 'price_min', 'profit_min', 'net_value_min', 'margin_ratio', '是否爆仓'],
         # axis=1, inplace=True)
-# print(df)
-# exit()
-# df.to_csv('D:\\PythonProjects\\BCoinDate\\data\\equity_curve.csv')
+
+# if os.name == 'nt':
+#     df.to_hdf(r'D:\PythonProjects\coin_data\equity_curve.h5', key='df', mode='w')
+#     df.to_csv(r'D:\PythonProjects\coin_data\equity_curve.csv')
+# elif os.name == 'posix':
+#     df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
+#     df.to_csv(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
+# else:
+#     print('操作系统不支持')
+#     exit()
 
 if os.name == 'nt':
-    df.to_hdf(r'D:\PythonProjects\coin_data\equity_curve.h5', key='df', mode='w')
-    df.to_csv(r'D:\PythonProjects\coin_data\equity_curve.csv')
+    path = 'D:\\PythonProjects\\coin_data\\BTCUSDT_equity_curve.h5'
 elif os.name == 'posix':
-    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.h5', key='df', mode='w')
-    df.to_csv(r'/Volumes/USB-DISK/PythonProjects/coin_data/equity_curve.csv')
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/BTCUSDT_equity_curve.h5'
 else:
     print('操作系统不支持')
     exit()
+
+df.to_hdf(path, key='df', mode='w')
+df.to_csv(path[:-2]+'csv') #将数据存入csv文件中,方便查看
+print('生成资金曲线文件成功，文件名为%s'%path)

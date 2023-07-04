@@ -3,6 +3,7 @@ import ccxt
 import os
 from datetime import timedelta, datetime
 from getKlinesFunction import *
+import numpy as np
 
 #定义全局变量类
 #设置代理服务器
@@ -62,7 +63,15 @@ global_start_time = df['start_time'][0]
 global_end_time = df['end_time'][0]
 global_update_time = df['update_time'][0]
 
-if global_start_time == 0:
+# if global_start_time == np.nan:
+#     print('首次获取数据')
+# else:
+#     print('1')
+# print(global_start_time)
+# exit()
+
+# exit()
+if np.isnan(global_start_time):
     pre_pre_day = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
     if pre_pre_day == global_update_time:
         if datetime.now().hour < 8:
@@ -81,8 +90,6 @@ if global_start_time == 0:
     else:
         print('数据已是最新')
         exit()
-
-    
 else:
     getPreDayDate = False
     
@@ -139,13 +146,6 @@ if getPreDayDate:
             for time_interval in global_time_interval_list:
                 get_okex_klines(global_okex_exchange, symbol, time_interval, start_time, end_time, global_instType, global_file_path)
 else:
-    #=====选择开始、结束时间抓取数据
-    
-
-    # #手工设置起始时间
-    # start_time = '2023-06-22 00:00:00'
-    # binance_end_time = '2023-06-23 23:59:59'
-
     binance_end_time = global_end_time
     okx_end_time = global_end_time
     okx_future_end_time = global_end_time

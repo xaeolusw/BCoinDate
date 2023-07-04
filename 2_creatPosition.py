@@ -6,16 +6,16 @@ pd.set_option('display.max_rows', 5000)  # 最多显示数据的行数
 
 # ===导入数据
 if os.name == 'nt':
-    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\signals.h5', key='df')
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\BTCUSDT_signals.h5', key='df')
 elif os.name == 'posix':
-    df = pd.read_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/signals.h5', key='df')
+    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/BTCUSDT_signals.h5', key='df')
 else:
     print('操作系统不支持')
     exit()
 
 # ===由signal计算出实际的每天持有仓位
 # 在产生signal的k线结束的时候，进行买入
-df['signal'].fillna(method='ffill', inplace=True)
+df['signal'].fillna(method='ffill', inplace=True)   # 用前面的信号值填充当天的信号值
 df['signal'].fillna(value=0, inplace=True)  # 将初始行数的signal补全为0
 df['pos'] = df['signal'].shift()
 df['pos'].fillna(value=0, inplace=True)  # 将初始行数的pos补全为0
@@ -33,12 +33,16 @@ df['pos'].fillna(method='ffill', inplace=True)
 
 # ===将数据存入hdf文件中
 # 删除无关中间变量
-df.drop(['signal'], axis=1, inplace=True)
+df.drop(['signal','volume'], axis=1, inplace=True)
 
 if os.name == 'nt':
-    df.to_hdf(r'D:\PythonProjects\coin_data\pos.h5', key='df', mode='w')
+    path = 'D:\\PythonProjects\\coin_data\\BTCUSDT_pos.h5'
 elif os.name == 'posix':
-    df.to_hdf(r'/Volumes/USB-DISK/PythonProjects/coin_data/pos.h5', key='df', mode='w')
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/BTCUSDT_pos.h5'
 else:
     print('操作系统不支持')
     exit()
+
+df.to_hdf(path, key='df', mode='w')
+df.to_csv(path[:-2]+'csv') #将数据存入csv文件中,方便查看
+print('生成仓位文件成功，文件名为%s'%path)

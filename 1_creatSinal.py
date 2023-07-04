@@ -10,7 +10,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 # 当收盘价由下向上穿过上轨的时候，做多；然后由上向下穿过中轨的时候，平仓。
 # 当收盘价由上向下穿过下轨的时候，做空；然后由下向上穿过中轨的时候，平仓。
 
-# =====读入数据(除首次外使用)
+# =====读入数据
 # symbol = 'BTCUSDT'
 # if os.name == 'nt':
 #     path = 'D:\\PythonProjects\\BCoinDate\\data\\binance_%s_15m.h5'%symbol
@@ -21,7 +21,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 #     exit()
 
 if os.name == 'nt':
-    path = 'D:\\PythonProjects\\BCoinDate\\data\\binance_BTCUSDT_15m.h5'
+    path = 'D:\\PythonProjects\\coin_data\\binance_BTCUSDT_15m.h5'
 elif os.name == 'posix':
     path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_BTCUSDT_15m.h5'
 else:
@@ -34,35 +34,32 @@ df = pd.read_hdf(path, key='BTCUSDT_15m')
 n = 400
 m = 2
 # 计算均线
-df['median'] = df['close'].rolling(n, min_periods=1).mean() #min_periods=1代表最小周期为1时也进行计算;
+df['median'] = df['close'].rolling(n, min_periods=n).mean() #min_periods=1代表最小周期为1时也进行计算;！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
 
 # 计算上轨、下轨道
-df['std'] = df['close'].rolling(n, min_periods=1).std(ddof=0)  # ddof代表标准差自由度
+df['std'] = df['close'].rolling(n, min_periods=n).std(ddof=0)  # ddof代表标准差自由度。！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
 df['upper'] = df['median'] + m * df['std']
 df['lower'] = df['median'] - m * df['std']
 
 # ==计算信号
-# 找出做多信号
+# 找出做多信号（上穿上轨）
 condition1 = df['close'] > df['upper']  # 当前K线的收盘价 > 上轨
-condition2 = df['close'].shift(1) <= df['upper'].shift(1)  # 之前K线的收盘价 <= 上轨
-condition = condition1 & condition2  # 将两个条件合并为一个条件
-df.loc[condition,'signal_long'] = 1  # 将产生做多信号的那根K线的signal设置为1，1代表做多
-# print(df[df['signal_long'] == 1])
-# exit()
+condition2 = df['close'].shift(1) <= df['upper'].shift(1)  # 上一条K线的收盘价 <= 上轨
+df.loc[condition1 & condition2, 'signal_long'] = 1  # 将产生做多信号的那根K线的signal设置为1，1代表做多
 
-# 找出做多平仓信号
+# 找出做多平仓信号（下穿中轨）
 condition1 = df['close'] < df['median']  # 当前K线的收盘价 < 中轨
-condition2 = df['close'].shift(1) >= df['median'].shift(1)  # 之前K线的收盘价 >= 中轨
+condition2 = df['close'].shift(1) >= df['median'].shift(1)  # 上一条K线的收盘价 >= 中轨
 df.loc[condition1 & condition2, 'signal_long'] = 0  # 将产生平仓信号当天的signal设置为0，0代表平仓
 
-# 找出做空信号
+# 找出做空信号（下穿下轨）
 condition1 = df['close'] < df['lower']  # 当前K线的收盘价 < 下轨
-condition2 = df['close'].shift(1) >= df['lower'].shift(1)  # 之前K线的收盘价 >= 下轨
+condition2 = df['close'].shift(1) >= df['lower'].shift(1)  # 上一条K线的收盘价 >= 下轨
 df.loc[condition1 & condition2, 'signal_short'] = -1  # 将产生做空信号的那根K线的signal设置为-1，-1代表做空
 
-# 找出做空平仓信号
+# 找出做空平仓信号（上穿中轨）
 condition1 = df['close'] > df['median']  # 当前K线的收盘价 > 中轨
-condition2 = df['close'].shift(1) <= df['median'].shift(1)  # 之前K线的收盘价 <= 中轨
+condition2 = df['close'].shift(1) <= df['median'].shift(1)  # 上一条K线的收盘价 <= 中轨
 df.loc[condition1 & condition2, 'signal_short'] = 0  # 将产生平仓信号当天的signal设置为0，0代表平仓
 
 # 合并做多做空信号，去除重复信号
@@ -72,8 +69,9 @@ temp = temp[temp['signal'] != temp['signal'].shift(1)]
 df['signal'] = temp['signal']
 
 # ==删除无关变量
-# df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
+df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
 # print(df)
+
 # df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值
 
 # =====将数据存入hdf文件中
@@ -86,7 +84,7 @@ df['signal'] = temp['signal']
 #     exit()
 
 if os.name == 'nt':
-    path = 'D:\\PythonProjects\\BCoinDate\\data\\BTCUSDT_signals.h5'
+    path = 'D:\\PythonProjects\\coin_data\\BTCUSDT_signals.h5'
 elif os.name == 'posix':
     path = '/Volumes/USB-DISK/PythonProjects/coin_data/BTCUSDT_signals.h5'
 else:
@@ -94,5 +92,5 @@ else:
     exit()
 
 df.to_hdf(path, key='df', mode='w')
-df.to_csv(path[:-2]+'csv')
+df.to_csv(path[:-2]+'csv') #将数据存入csv文件中,方便查看
 print('生成信号文件成功，文件名为%s'%path)
