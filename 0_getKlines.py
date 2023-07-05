@@ -3,7 +3,6 @@ import ccxt
 import os
 from datetime import timedelta, datetime
 from getKlinesFunction import *
-import numpy as np
 
 #定义全局变量类
 #设置代理服务器
@@ -67,11 +66,11 @@ global_update_time = df['update_time'][0]
 #     print('首次获取数据')
 # else:
 #     print('1')
-# print(global_start_time)
+print(global_start_time)
 # exit()
 
 # exit()
-if np.isnan(global_start_time):
+if True:
     pre_pre_day = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
     if pre_pre_day == global_update_time:
         if datetime.now().hour < 8:

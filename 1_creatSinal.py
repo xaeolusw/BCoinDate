@@ -34,10 +34,10 @@ df = pd.read_hdf(path, key='BTCUSDT_15m')
 n = 400
 m = 2
 # 计算均线
-df['median'] = df['close'].rolling(n, min_periods=n).mean() #min_periods=1代表最小周期为1时也进行计算;！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
+df['median'] = df['close'].rolling(n, min_periods=1).mean() #min_periods=1代表最小周期为1时也进行计算;！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
 
 # 计算上轨、下轨道
-df['std'] = df['close'].rolling(n, min_periods=n).std(ddof=0)  # ddof代表标准差自由度。！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
+df['std'] = df['close'].rolling(n, min_periods=1).std(ddof=0)  # ddof代表标准差自由度。！！！默认 min_periods=1，我将其改为n，即最小周期为n时才进行计算
 df['upper'] = df['median'] + m * df['std']
 df['lower'] = df['median'] - m * df['std']
 
@@ -69,7 +69,7 @@ temp = temp[temp['signal'] != temp['signal'].shift(1)]
 df['signal'] = temp['signal']
 
 # ==删除无关变量
-df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','quote_asset_volume'], axis=1, inplace=True)
+df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','volume','quote_asset_volume'], axis=1, inplace=True)
 # print(df)
 
 # df = df[df['signal'].isna() == False]   #为什么不删除空值？编写资金曲线时需要所有的数据，包括空值

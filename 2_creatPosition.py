@@ -33,7 +33,7 @@ df['pos'].fillna(method='ffill', inplace=True)
 
 # ===将数据存入hdf文件中
 # 删除无关中间变量
-df.drop(['signal','volume'], axis=1, inplace=True)
+df.drop(['signal'], axis=1, inplace=True)
 
 if os.name == 'nt':
     path = 'D:\\PythonProjects\\coin_data\\BTCUSDT_pos.h5'

@@ -135,6 +135,7 @@ else:
     print('操作系统不支持')
     exit()
 
+print('策略最终收益：', df.iloc[-1]['equity_curve'])
 df.to_hdf(path, key='df', mode='w')
 df.to_csv(path[:-2]+'csv') #将数据存入csv文件中,方便查看
 print('生成资金曲线文件成功，文件名为%s'%path)

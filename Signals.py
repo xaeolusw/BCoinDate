@@ -27,9 +27,9 @@ def signal_simple_bolling(df, para=[200, 2]):
 
     # ===计算指标
     # 计算均线
-    df['median'] = df['close'].rolling(n, min_periods=1).mean()
+    df['median'] = df['close'].rolling(n, min_periods=n).mean()
     # 计算上轨、下轨道
-    df['std'] = df['close'].rolling(n, min_periods=1).std(ddof=0)  # ddof代表标准差自由度
+    df['std'] = df['close'].rolling(n, min_periods=n).std(ddof=0)  # ddof代表标准差自由度
     df['upper'] = df['median'] + m * df['std']
     df['lower'] = df['median'] - m * df['std']
 
@@ -61,13 +61,13 @@ def signal_simple_bolling(df, para=[200, 2]):
     df['signal'] = temp['signal']
 
     # ===删除无关变量
-    df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short'], axis=1, inplace=True)
+    # df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','volume', 'quote_asset_volume'], axis=1, inplace=True)
 
     return df
 
 
 # 策略参数组合
-def signal_simple_bolling_para_list(m_list=range(10, 1000, 10), n_list=[i / 10 for i in list(np.arange(5, 50, 1))]):
+def signal_simple_bolling_para_list(m_list=range(200, 1000, 10), n_list=[i / 10 for i in list(np.arange(20, 50, 1))]): #m_list=range(10, 1000, 10), n_list=[i / 10 for i in list(np.arange(5, 50, 1)
     """
     产生布林 策略的参数范围
     :param m_list:
@@ -135,7 +135,7 @@ def signal_simple_turtle(df, para=[20, 10]):
     df['signal'] = temp['signal']
 
     # 将无关的变量删除
-    df.drop(['n1_high', 'n1_low', 'n2_high', 'n2_low', 'signal_long', 'signal_short', 'open_close_high', 'open_close_low'], axis=1, inplace=True)
+    # df.drop(['n1_high', 'n1_low', 'n2_high', 'n2_low', 'signal_long', 'signal_short', 'open_close_high', 'open_close_low'], axis=1, inplace=True)
 
     return df
 

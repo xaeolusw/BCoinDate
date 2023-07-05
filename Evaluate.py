@@ -98,7 +98,7 @@ def equity_curve_for_OKEx_USDT_future_next_open(df, slippage=1 / 1000, c_rate=5 
     df.loc[close_pos_condition & (df['net_value'] < 0), '是否爆仓'] = 1
 
     # ===对爆仓进行处理
-    df['是否爆仓'] = df.groupby('start_time')['是否爆仓'].fillna(method='ffill')
+    df['是否爆仓'] = df.groupby('start_time')['是否爆仓'].transform(lambda x: x.fillna(method='ffill')) #原为 df['是否爆仓'] = df.groupby('start_time')['是否爆仓'].fillna(method='ffill')
     df.loc[df['是否爆仓'] == 1, 'net_value'] = 0
 
     # =====计算资金曲线
