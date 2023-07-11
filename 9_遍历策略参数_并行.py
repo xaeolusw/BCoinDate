@@ -10,8 +10,9 @@
 """
 import pandas as pd
 from datetime import timedelta
-from multiprocessing.pool import Pool
+import multiprocessing as mp
 from datetime import datetime
+import os
 from Signals import *
 from Position import *
 from Evaluate import *
@@ -20,7 +21,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # =====参数设定
 # 手工设定策略参数
-symbol = 'BTC-USDT_5m'
+symbol = 'BTCUSDT'
 
 face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
@@ -32,29 +33,36 @@ drop_days = 10  # 币种刚刚上线10天内不交易
 
 
 # =====读入数据
-df = pd.read_hdf('/Users/xingbuxingx/Desktop/数字货币量化课程/2020版数字货币量化投资课程/xbx_coin_2020/data/%s.h5' % symbol, key='df')
+if os.name == 'nt':
+    df = pd.read_hdf('D:\\PythonProjects\\coin_data\\binance_%s_15m.h5'%symbol, key='%s_15m'%symbol)
+elif os.name == 'posix':
+    df = pd.read_hdf('/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_15m.h5'%symbol, key='%s_15m'%symbol)
+else:
+    print('操作系统不支持')
+    exit()
+
 # 任何原始数据读入都进行一下排序、去重，以防万一
 df.sort_values(by=['candle_begin_time'], inplace=True)
 df.drop_duplicates(subset=['candle_begin_time'], inplace=True)
 df.reset_index(inplace=True, drop=True)
 
 
-# =====转换为其他分钟数据
-rule_type = '15T'
-period_df = df.resample(rule=rule_type, on='candle_begin_time', label='left', closed='left').agg(
-    {'open': 'first',
-     'high': 'max',
-     'low': 'min',
-     'close': 'last',
-     'volume': 'sum',
-     'quote_volume': 'sum',
-     })
-period_df.dropna(subset=['open'], inplace=True)  # 去除一天都没有交易的周期
-period_df = period_df[period_df['volume'] > 0]  # 去除成交量为0的交易周期
-period_df.reset_index(inplace=True)
-df = period_df[['candle_begin_time', 'open', 'high', 'low', 'close', 'volume', 'quote_volume']]
-df = df[df['candle_begin_time'] >= pd.to_datetime('2017-01-01')]
-df.reset_index(inplace=True, drop=True)
+# # =====转换为其他分钟数据
+# rule_type = '15T'
+# period_df = df.resample(rule=rule_type, on='candle_begin_time', label='left', closed='left').agg(
+#     {'open': 'first',
+#      'high': 'max',
+#      'low': 'min',
+#      'close': 'last',
+#      'volume': 'sum',
+#      'quote_volume': 'sum',
+#      })
+# period_df.dropna(subset=['open'], inplace=True)  # 去除一天都没有交易的周期
+# period_df = period_df[period_df['volume'] > 0]  # 去除成交量为0的交易周期
+# period_df.reset_index(inplace=True)
+# df = period_df[['candle_begin_time', 'open', 'high', 'low', 'close', 'volume', 'quote_volume']]
+# df = df[df['candle_begin_time'] >= pd.to_datetime('2017-01-01')]
+# df.reset_index(inplace=True, drop=True)
 
 
 # =====获取策略参数组合
@@ -86,14 +94,20 @@ def calculate_by_one_loop(para):
 
 # =====并行提速
 start_time = datetime.now()  # 标记开始时间
-with Pool(processes=2) as pool:  # or whatever your hardware can support
-    # 使用并行批量获得data frame的一个列表
-    df_list = pool.map(calculate_by_one_loop, para_list)
-    print('读入完成, 开始合并', datetime.now() - start_time)
-    # 合并为一个大的DataFrame
-    para_curve_df = pd.concat(df_list, ignore_index=True)
-
+# mp.freeze_support()
+with mp.Pool(processes=1) as pool:  # or whatever your hardware can support
+    try:
+        # mp.freeze_support()
+        # 使用并行批量获得data frame的一个列表
+        df_list = pool.map(calculate_by_one_loop, para_list)
+        # df_list = pool.map(print, 'hello')
+        print('读入完成, 开始合并', datetime.now() - start_time)
+        # 合并为一个大的DataFrame
+        # para_curve_df = pd.concat(df_list, ignore_index=True)
+    except Exception as e:
+        print(e)
+    
 
 # =====输出
-para_curve_df.sort_values(by='equity_curve', ascending=False, inplace=True)
-print(para_curve_df)
+# para_curve_df.sort_values(by='equity_curve', ascending=False, inplace=True)
+# print(para_curve_df)

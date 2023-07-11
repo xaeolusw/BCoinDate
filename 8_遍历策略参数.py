@@ -14,6 +14,8 @@ if symbol == 'BTCUSDT':
     face_value = 0.01  # btc是0.01，不同的币种要进行不同的替换;ETH是0.1
 elif symbol == 'ETHUSDT':
     face_value = 0.1
+else:
+    face_value = 0.1
 c_rate = 5 / 10000  # 手续费，commission fees，默认为万分之5。不同市场手续费的收取方法不同，对结果有影响。比如和股票就不一样。
 slippage = 1 / 1000  # 滑点 ，可以用百分比，也可以用固定值。建议币圈用百分比，股票用固定值
 leverage_rate = 3   ## 交易所的杠杆倍数。
