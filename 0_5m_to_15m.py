@@ -4,7 +4,7 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 
 # =====读入数据(首次使用)
-symbol = 'ETHUSDT'
+symbol = 'BTCUSDT'
 if os.name == 'nt':
     df = pd.read_hdf('D:\\PythonProjects\\coin_data\\binance_%s_5m.h5'%symbol, key='%s_5m'%symbol)
 elif os.name == 'posix':
@@ -19,7 +19,7 @@ df.drop_duplicates(subset=['candle_begin_time'], inplace=True)
 df.reset_index(inplace=True, drop=True)
 
 # =====转换为其他分钟数据
-rule_type = '15T'
+rule_type = '30T'
 period_df = df.resample(rule=rule_type, on='candle_begin_time', label='left', closed='left').agg(
     {'open': 'first',
      'high': 'max',
@@ -37,12 +37,12 @@ df.reset_index(inplace=True, drop=True)
 
 
 if os.name == 'nt':
-    path = 'D:\\PythonProjects\\coin_data\\binance_%s_%s.h5' % (symbol, '15m')
-    df.to_hdf(path, key='%s_15m'%symbol, mode='a')
+    path = 'D:\\PythonProjects\\coin_data\\binance_%s_%s.h5' % (symbol, rule_type)
+    df.to_hdf(path, key='%s_%s'% (symbol, rule_type), mode='a')
     print('转换成功, 转换为%s'%path)
 elif os.name == 'posix':
-    path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_%s.h5' % (symbol, '15m')
-    df.to_hdf(path, key='%s_15m'%symbol)
+    path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_%s.h5' % (symbol, rule_type)
+    df.to_hdf(path, key='%s_%s'% (symbol, rule_type))
     print('转换成功, 转换为%s'%path)
 else:
     print('操作系统不支持')

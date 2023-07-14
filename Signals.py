@@ -6,20 +6,6 @@ import numpy as np
 import talib # 用于计算技术指标
 import matplotlib.pyplot as plt
 
-close = np.array([100,200,300,400,500,600],dtype=np.double)  # 请将...替换为您的数据
-
-# 计算指标
-fast = 20
-slow = 60
-fastMA = talib.EMA(close, fast)
-slowMA = talib.EMA(close, slow)
-primeCost = ((fastMA - slowMA) / slowMA) * 100
-    
-# 绘制图表
-plt.plot(primeCost, color='blue')
-plt.show()
-exit()
-
 # =====简单布林策略
 # 策略
 def signal_simple_bolling(df, para=[200, 2]):
@@ -171,15 +157,69 @@ def signal_simple_turtle_para_list(n1_list=range(10, 1000, 10), n2_list=range(10
 #primeCost20/60
 def signal_simple_primeCost(df, para=[20, 60]):
     # 输入数据
-    close = np.array([...])  # 请将...替换为您的数据
+    # close = np.array(df['close'], dtype=np.double)  # 请将...替换为您的数据
 
-    # 计算指标
-    fast = 20
-    slow = 60
-    fastMA = talib.EMA(close, fast)
-    slowMA = talib.EMA(close, slow)
-    primeCost = ((fastMA - slowMA) / slowMA) * 100
+    # # 计算指标
+    # fast = para[0]
+    # slow = para[1]
+    # fastMA = talib.EMA(close, fast) # type: ignore
+    # slowMA = talib.EMA(close, slow) # type: ignore
+    # print(fastMA)
+    # exit()
+    # primeCost = ((fastMA - slowMA) / slowMA) * 100
     
-    # 绘制图表
-    plt.plot(primeCost, color='blue')
-    plt.show()
+    # # 绘制图表
+    # plt.plot(primeCost, color='blue')
+    # plt.show()
+
+    # ===计算指标
+    df['fastMA'] = talib.EMA(df['close'], para[0]) # type: ignore
+    df['slowMA'] = talib.EMA(df['close'], para[1]) # type: ignore
+    df['primeCost'] = ((df['fastMA'] - df['slowMA']) / df['slowMA']) * 100
+    
+    # ===计算信号
+    # 找出做多信号
+    condition1 = df['primeCost'] > 0
+    condition2 = df['primeCost'].shift(1) <= 0  
+    df.loc[condition1 & condition2, 'signal_long'] = 1  # 将产生做多信号的那根K线的signal设置为1，1代表做多
+    
+    # 找出做多平仓信号
+    condition1 = df['primeCost'] < df['primeCost'].shift(1)  
+    condition2 = df['primeCost'].shift(1) < df['primeCost'].shift(2)
+    df.loc[condition1, 'signal_long'] = 0  # 将产生平仓信号当天的signal设置为0，0代表平仓
+
+    df['signal_long'].fillna(method='ffill', inplace=True)  # 将值填充为之前最近的数据
+    df['signal_long'].fillna(value=0, inplace=True)  # 将初始行数的数据填充为0
+
+    # 找出做空信号
+    condition1 = df['primeCost'] < 0  
+    condition2 = df['primeCost'].shift(1) >= 0  
+    df.loc[condition1 & condition2, 'signal_short'] = -1  # 将产生做空信号的那根K线的signal设置为-1，-1代表做空
+
+    # 找出做空平仓信号
+    condition1 = df['primeCost'] > df['primeCost'].shift(1)  
+    condition2 = df['primeCost'].shift(1) > df['primeCost'].shift(2)
+    df.loc[condition1 & condition2, 'signal_short'] = 0  # 将产生平仓信号当天的signal设置为0，0代表平仓
+
+    df['signal_short'].fillna(method='ffill', inplace=True)  # 将值填充为之前最近的数据
+    df['signal_short'].fillna(value=0, inplace=True)  # 将初始行数的数据填充为0
+    # 合并做多做空信号，去除重复信号
+    # df['signal'] = df[['signal_long', 'signal_short']].sum(axis=1, min_count=1, skipna=True)  # 若你的pandas版本是最新的，请使用本行代码代替上面一行
+    # temp = df[df['signal'].notnull()][['signal']]
+    # temp = temp[temp['signal'] != temp['signal'].shift(1)]
+    # df['signal'] = temp['signal']
+        
+    df['signal'] = df['signal_long'] + df['signal_short']
+
+    # df['signal'] = df[['signal_long', 'signal_short']].sum(axis=1, min_count=1, skipna=True)  # 若你的pandas版本是最新的，请使用本行代码代替上面一行
+    # temp = df[df['signal'].notnull()][['signal']]
+    # temp = temp[temp['signal'] != temp['signal'].shift(1)]
+    # df['signal'] = temp['signal']
+    # ===删除无关变量
+    # df.drop(['median', 'std', 'upper', 'lower', 'signal_long', 'signal_short','volume', 'quote_asset_volume'], axis=1, inplace=True)
+
+    # # 绘制图表
+    # plt.plot(df['primeCost'], color='blue')
+    # plt.show()
+
+    return df
