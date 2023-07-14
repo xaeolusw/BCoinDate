@@ -3,7 +3,22 @@
 """
 import pandas as pd
 import numpy as np
+import talib # 用于计算技术指标
+import matplotlib.pyplot as plt
 
+close = np.array([100,200,300,400,500,600],dtype=np.double)  # 请将...替换为您的数据
+
+# 计算指标
+fast = 20
+slow = 60
+fastMA = talib.EMA(close, fast)
+slowMA = talib.EMA(close, slow)
+primeCost = ((fastMA - slowMA) / slowMA) * 100
+    
+# 绘制图表
+plt.plot(primeCost, color='blue')
+plt.show()
+exit()
 
 # =====简单布林策略
 # 策略
@@ -153,3 +168,18 @@ def signal_simple_turtle_para_list(n1_list=range(10, 1000, 10), n2_list=range(10
 
     return para_list
 
+#primeCost20/60
+def signal_simple_primeCost(df, para=[20, 60]):
+    # 输入数据
+    close = np.array([...])  # 请将...替换为您的数据
+
+    # 计算指标
+    fast = 20
+    slow = 60
+    fastMA = talib.EMA(close, fast)
+    slowMA = talib.EMA(close, slow)
+    primeCost = ((fastMA - slowMA) / slowMA) * 100
+    
+    # 绘制图表
+    plt.plot(primeCost, color='blue')
+    plt.show()
