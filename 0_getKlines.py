@@ -66,7 +66,7 @@ global_update_time = df['update_time'][0]
 #     print('首次获取数据')
 # else:
 #     print('1')
-print(global_start_time)
+# print(global_start_time)
 # exit()
 
 # exit()
@@ -151,6 +151,8 @@ else:
       
     print(f'抓取binance{global_start_time}到{binance_end_time}的币币数据！')
 
+    # get_binance_klines(global_binance_exchange, 'BTCUSDT', '5m', global_start_time, binance_end_time, global_instType, global_file_path)
+    # exit()
     while global_start_time < binance_end_time :
         temp_time = str(pd.to_datetime(binance_end_time) - timedelta(days=30))
 

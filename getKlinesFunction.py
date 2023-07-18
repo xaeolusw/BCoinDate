@@ -45,6 +45,7 @@ def get_binance_klines(global_binance_exchange, symbol, time_interval, start_tim
         }  
 
         kline_data = global_binance_exchange.publicGetKlines(params=params)  # type: ignore # 获取数据
+        
 
         # df = pd.DataFrame(kline_data, dtype=float)  # 将数据转换为dataframe #缺少这两行代码
         # df_list = pd.concat([df], ignore_index=True)  #缺少这两行代码

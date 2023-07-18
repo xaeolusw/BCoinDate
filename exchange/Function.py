@@ -1,13 +1,3 @@
-"""
-《邢不行-2020新版|Python数字货币量化投资课程》
-无需编程基础，助教答疑服务，专属策略网站，一旦加入，永续更新。
-课程详细介绍：https://quantclass.cn/crypto/class
-邢不行微信: xbx9025
-本程序作者: 邢不行
-
-# 课程内容
-择时策略实盘需要的相关函数
-"""
 import ccxt
 import math
 import time
@@ -22,8 +12,8 @@ import base64
 from urllib import parse
 from multiprocessing import Pool
 from functools import partial
-from program.三_少年意气.四_择时策略实盘初阶.Config import *
-from program.三_少年意气.四_择时策略实盘初阶.Signals import *
+from Config import *
+from Signals import *
 
 
 # =====okex交互函数
@@ -612,7 +602,7 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     """
 
     # 获取当前时间
-    now_milliseconds = int(time.time() * 1e3)
+    now_milliseconds = int(time.time() * 1e3)   #将当前时间转换为毫秒
 
     # 每根K线的间隔时间
     time_interval_int = int(time_interval[:-1])  # 若15m，则time_interval_int = 15；若2h，则time_interval_int = 2
@@ -620,6 +610,9 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
         time_segment = time_interval_int * 60 * 1000  # 15分钟 * 每分钟60s
     elif time_interval.endswith('h'):
         time_segment = time_interval_int * 60 * 60 * 1000  # 2小时 * 每小时60分钟 * 每分钟60s
+    else:
+        print('time_interval格式不符合规范。程序exit')
+        exit()
 
     # 计算开始和结束的时间
     end = now_milliseconds - time_segment
@@ -629,14 +622,15 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     all_kline_data = []
     while end - since >= time_segment:
         kline_data = []
-
+        
         # 获取K线使，要多次尝试
         for i in range(max_try_amount):
             try:
                 kline_data = exchange.fetch_ohlcv(symbol=symbol, since=since, timeframe=time_interval)
+                # print(kline_data)
                 break
             except Exception as e:
-                print(e)
+                print('出错，' + str(e))
                 time.sleep(medium_sleep_time)
                 if i == (max_try_amount - 1):
                     _ = '【获取需要交易币种的历史数据】阶段，fetch_okex_symbol_history_candle_data函数中，' \
@@ -654,14 +648,16 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     df = pd.DataFrame(all_kline_data, dtype=float)
     df.rename(columns={0: 'MTS', 1: 'open', 2: 'high', 3: 'low', 4: 'close', 5: 'volume'}, inplace=True)
     df['candle_begin_time'] = pd.to_datetime(df['MTS'], unit='ms')
-    df['candle_begin_time_GMT8'] = df['candle_begin_time'] + timedelta(hours=8)
+    df['candle_begin_time_GMT8'] = df['candle_begin_time'] + timedelta(hours=8) # 北京时间 = 格林威治时间 + 8小时
     df = df[['candle_begin_time_GMT8', 'open', 'high', 'low', 'close', 'volume']]
 
     # 删除重复的数据
     df.drop_duplicates(subset=['candle_begin_time_GMT8'], keep='last', inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    # 为了保险起见，去掉最后一行最新的数据
+    # 为了保险起见，去掉最后一行最新的数据  #为什么要去掉？最后一个K线的数据可能不全，可能会导致错误。
+    print(df.head(2))
+    print(df.tail(2))
     df = df[:-1]
 
     print(symbol, '获取历史数据行数：', len(df))
