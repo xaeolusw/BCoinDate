@@ -1,4 +1,4 @@
-mport ccxt
+import ccxt
 import os
 from time import sleep
 import pandas as pd
@@ -93,6 +93,7 @@ def main():
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
         print('\nsymbol_info:\n', symbol_info, '\n')
 
+        exit()
         # =获取策略执行时间，并sleep至该时间
         run_time = sleep_until_run_time(time_interval)
 
