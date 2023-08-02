@@ -611,7 +611,7 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     elif time_interval.endswith('h'):
         time_segment = time_interval_int * 60 * 60 * 1000  # 2小时 * 每小时60分钟 * 每分钟60s
     else:
-        print('time_interval格式不符合规范。程序exit')
+        print('time_interval格式不符合规范。程序退出！')
         exit()
 
     # 计算开始和结束的时间
@@ -656,8 +656,8 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     df.reset_index(drop=True, inplace=True)
 
     # 为了保险起见，去掉最后一行最新的数据  #为什么要去掉？最后一个K线的数据可能不全，可能会导致错误。
-    print(df.head(2))
-    print(df.tail(2))
+    # print(df.head(2))
+    # print(df.tail(2))
     df = df[:-1]
 
     print(symbol, '获取历史数据行数：', len(df))

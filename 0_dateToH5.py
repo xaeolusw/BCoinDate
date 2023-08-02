@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import os
+import time
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 
 # 筛选出指定币种和指定时间
@@ -46,4 +47,16 @@ for symbol in symbol_list:
     else:
         print('操作系统不支持')
         exit()
+        
+    # if os.name == 'nt':
+    #     path = 'D:\\PythonProjects\\coin_data\\binance_%s_5m_%s.h5' % (symbol, time.strftime('%Y-%m-%d',time.localtime()))
+    #     data.to_hdf(path, key='%s_5m' % symbol, mode='w')
+    #     print('转换成功, 转换为%s'%path)
+    # elif os.name == 'posix':
+    #     path = '/Volumes/USB-DISK/PythonProjects/coin_data/binance_%s_5m_%s.h5' % (symbol, time.strftime('%Y-%m-%d',time.localtime()))
+    #     data.to_hdf(path, key='%s_5m' % symbol, mode='w')
+    #     print('转换成功, 转换为%s'%path)
+    # else:
+    #     print('操作系统不支持')
+    #     exit()
 
