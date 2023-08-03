@@ -71,15 +71,15 @@ symbol_config = {
 
 def main():
     # =====获取需要交易币种的历史数据=====
-    max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
-    symbol_candle_data = dict()  # 用于存储K线数据
-    # 遍历获取币种历史数据
-    for symbol in symbol_config.keys():
-        # 获取币种的历史数据，会删除最新一行的数据
-        symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
-                                                                           symbol_config[symbol]['instrument_id'],
-                                                                           time_interval, max_len=max_len)
-        time.sleep(medium_sleep_time)
+    # max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
+    # symbol_candle_data = dict()  # 用于存储K线数据
+    # # 遍历获取币种历史数据
+    # for symbol in symbol_config.keys():
+    #     # 获取币种的历史数据，会删除最新一行的数据
+    #     symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
+    #                                                                        symbol_config[symbol]['instrument_id'],
+    #                                                                        time_interval, max_len=max_len)
+    #     time.sleep(medium_sleep_time)
     
     # ===进入每次的循环
     while True:
@@ -89,7 +89,25 @@ def main():
         symbol_info_columns = ['账户权益', '持仓方向', '持仓量', '持仓收益率', '持仓收益', '持仓均价', '当前价格', '最大杠杆']
         symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)  # 转化为dataframe
 
-        # 更新账户信息symbol_info
+        list = exchange.account()
+        list = list[0]['details']
+        print(list)
+        list = exchange.private_get_account_positions()
+        print(list)
+        # # 更新账户信息symbol_info
+        # for _ in range(5):
+        #     try:
+        #         future_info = exchange.account()['info']
+        #         df = pd.DataFrame(future_info, dtype=float).T  # 将数据转化为df格式
+        #         return df
+        #     except Exception as e:
+        #         print('通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败，稍后重试：\n', e)
+        #         time.sleep(medium_sleep_time)
+
+        # _ = '通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败次数过多，程序Raise Error'
+
+        
+        exit()
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
         print('\nsymbol_info:\n', symbol_info, '\n')
 
