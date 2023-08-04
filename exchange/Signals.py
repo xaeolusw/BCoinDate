@@ -1,5 +1,6 @@
 """
-《邢不行-2020新版|Python数字货币量化投资课程》
+更新时间：2021-10-08
+《邢不行|Python数字货币量化投资课程》
 无需编程基础，助教答疑服务，专属策略网站，一旦加入，永续更新。
 课程详细介绍：https://quantclass.cn/crypto/class
 邢不行微信: xbx9025
@@ -13,12 +14,10 @@ import random
 
 
 # 将None作为信号返回
-def real_signal_none(df, now_pos, avg_price, para):
+def real_signal_none(df, para):
     """
     发出空交易信号
     :param df:
-    :param now_pos:
-    :param avg_price:
     :param para:
     :return:
     """
@@ -27,12 +26,10 @@ def real_signal_none(df, now_pos, avg_price, para):
 
 
 # 随机生成交易信号
-def real_signal_random(df, now_pos, avg_price, para):
+def real_signal_random(df,  para=[200,2]):
     """
     随机发出交易信号
     :param df:
-    :param now_pos:
-    :param avg_price:
     :param para:
     :return:
     """
@@ -49,7 +46,7 @@ def real_signal_random(df, now_pos, avg_price, para):
 
 
 # 布林策略实盘交易信号
-def real_signal_simple_bolling(df, now_pos, avg_price, para=[200, 2]):
+def real_signal_simple_bolling(df, para=[200, 2]):
     """
     实盘产生布林线策略信号的函数，和历史回测函数相比，计算速度更快。
     布林线中轨：n天收盘价的移动平均线

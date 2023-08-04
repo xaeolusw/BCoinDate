@@ -1,3 +1,14 @@
+"""
+更新时间：2021-10-08
+《邢不行|Python数字货币量化投资课程》
+无需编程基础，助教答疑服务，专属策略网站，一旦加入，永续更新。
+课程详细介绍：https://quantclass.cn/crypto/class
+邢不行微信: xbx9025
+本程序作者: 邢不行
+
+# 课程内容
+择时策略实盘需要的相关函数
+"""
 import ccxt
 import math
 import time
@@ -14,6 +25,7 @@ from multiprocessing import Pool
 from functools import partial
 from Config import *
 from Signals import *
+import Signals
 
 
 # =====okex交互函数
@@ -24,42 +36,26 @@ def ccxt_fetch_future_account(exchange, max_try_amount=5):
     :param max_try_amount:
     :return:
 
-    本程序使用okex3中“交割合约API”、“所有币种合约账户信息”接口，获取合约账户所有币种的账户信息。
-    使用ccxt函数：exchange.futures_get_accounts()
-    请求此接口，okex服务器会在其数据库中遍历所有币对下的账户数据，有大量的性能消耗，请求频率较低，时间较长。
-
-    接口返回数据格式样例：
-    {'info':
-    {
-    'eth-usdt': {'auto_margin': '0', 'can_withdraw': '9.97342426', 'contracts': [{'available_qty': '9.97342426', 'fixed_balance': '0.02657574', 'instrument_id': 'ETH-USDT-200327', 'margin_for_unfilled': '0', 'margin_frozen': '0.027094', 'realized_pnl': '0.00051826', 'unrealized_pnl': '-0.0018'}], 'currency': 'USDT', 'equity': '9.99878826', 'liqui_mode': 'tier', 'margin_mode': 'fixed', 'total_avail_balance': '9.97342426'},
-    'ltc-usdt': {'can_withdraw': '9.99970474', 'currency': 'USDT', 'equity': '9.99970474', 'liqui_fee_rate': '0.0005', 'liqui_mode': 'tier', 'maint_margin_ratio': '0.01', 'margin': '0', 'margin_for_unfilled': '0', 'margin_frozen': '0', 'margin_mode': 'crossed', 'margin_ratio': '10000', 'realized_pnl': '-0.00029526', 'total_avail_balance': '10', 'underlying': 'LTC-USDT', 'unrealized_pnl': '0'},
-    'eos': {'can_withdraw': '6.49953151', 'currency': 'EOS', 'equity': '7.22172698', 'liqui_fee_rate': '0.0005', 'liqui_mode': 'tier', 'maint_margin_ratio': '0.01', 'margin': '0.72219547', 'margin_for_unfilled': '0', 'margin_frozen': '0.72219547', 'margin_mode': 'crossed', 'margin_ratio': '0.99996847', 'realized_pnl': '0', 'total_avail_balance': '7.29194531', 'underlying': 'EOS-USD', 'unrealized_pnl': '-0.07021833'},
-    'eos-usdt': {'auto_margin': '0', 'can_withdraw': '9.91366074', 'contracts': [{'available_qty': '9.91366074', 'fixed_balance': '0.0827228', 'instrument_id': 'EOS-USDT-200327', 'margin_for_unfilled': '0', 'margin_frozen': '0.08167', 'realized_pnl': '-0.0010528', 'unrealized_pnl': '-0.0006'}], 'currency': 'USDT', 'equity': '9.99473074', 'liqui_mode': 'tier', 'margin_mode': 'fixed', 'total_avail_balance': '9.91366074'},
-    返回结果说明：
-    eth-usdt为usdt本位合约有持仓时返回的结果
-    ltc-usdt为usdt本位合约没有持仓，但是账户有usdt时返回的结果
-    eos-usdt为usdt本位合约同时有多、空持仓时返回的结果
-    eos为币本位合约有持仓时返回的结果
-
-    本函数输出示例：
-
-         auto_margin can_withdraw                                          contracts currency       equity liqui_fee_rate liqui_mode maint_margin_ratio      margin margin_for_unfilled margin_frozen margin_mode margin_ratio realized_pnl total_avail_balance underlying unrealized_pnl
-    eth-usdt           0   9.97342426  [{'available_qty': '9.97342426', 'fixed_balanc...     USDT   9.99847826            NaN       tier                NaN         NaN                 NaN           NaN       fixed          NaN          NaN          9.97342426        NaN            NaN
-    ltc-usdt         NaN   9.99970474                                                NaN     USDT   9.99970474         0.0005       tier               0.01           0                   0             0     crossed        10000  -0.00029526                  10   LTC-USDT              0
-    eos              NaN   6.49640362                                                NaN      EOS   7.21825155         0.0005       tier               0.01  0.72184793                   0    0.72184793     crossed   0.99996845            0          7.29194531    EOS-USD    -0.07369376
-    eos-usdt           0   9.91366074  [{'available_qty': '9.91366074', 'fixed_balanc...     USDT   9.99473074            NaN       tier                NaN         NaN                 NaN           NaN       fixed          NaN          NaN          9.91366074        NaN            NaN
-    btc-usdt         NaN  57.07262111                                                NaN     USDT  57.07262111         0.0005       tier              0.005           0                   0             0     crossed        10000            0         57.07262111   BTC-USDT              0
+    本程序使用okex5中"获取资金账户余额"、"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
+    使用ccxt函数：private_get_account_balance() 与 private_get_account_positions()
     """
     for _ in range(max_try_amount):
         try:
-            future_info = exchange.futures_get_accounts()['info']
-            df = pd.DataFrame(future_info, dtype=float).T  # 将数据转化为df格式
-            return df
+            balance_of = float(
+                exchange.private_get_account_balance({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
+            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
+
+            if not df.empty:
+                df.set_index('posId', drop=True, inplace=True)
+                df.replace('', 0, inplace=True)
+                return df, balance_of
+            else:
+                return pd.DataFrame(), balance_of
         except Exception as e:
             print('通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败，稍后重试：\n', e)
             time.sleep(medium_sleep_time)
 
-    _ = '通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败次数过多，程序Raise Error'
+    _ = '通过ccxt的通过futures_get_accounts获取余额与持仓信息，失败次数过多，程序Raise Error'
     send_dingding_and_raise_error(_)
 
 
@@ -69,38 +65,31 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
     :param exchange:
     :param max_try_amount:
     :return:
-    本程序使用okex3中“交割合约API”、“所有合约持仓信息”接口，获取合约账户所有合约的持仓信息。
-    使用ccxt函数：exchange.futures_get_position()
-    请求此接口，okex服务器会在其数据库中遍历所有币对下的持仓数据，有大量的性能消耗，请求频率较低，时间较长。
+    本程序使用okex5中"获取资金账户余额"、"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
+    使用ccxt函数：private_get_account_balance() 与 private_get_account_positions()
 
     接口返回数据格式样例：
-    {'result': True, 'holding':
-    [[{'long_qty': '1', 'long_avail_qty': '1', 'long_margin': '0.027094', 'long_liqui_price': '241.07', 'long_pnl_ratio': '-0.0636223', 'long_avg_cost': '265.63', 'long_settlement_price': '265.63', 'realised_pnl': '0.00051826', 'short_qty': '0', 'short_avail_qty': '0', 'short_margin': '0', 'short_liqui_price': '0', 'short_pnl_ratio': '0.0714716', 'short_avg_cost': '265.84', 'short_settlement_price': '265.84', 'instrument_id': 'ETH-USDT-200327', 'long_leverage': '10', 'short_leverage': '10', 'created_at': '2020-02-22T08:02:04.469Z', 'updated_at': '2020-02-22T08:42:02.484Z', 'margin_mode': 'fixed', 'short_margin_ratio': '10000.0', 'short_maint_margin_ratio': '0.01', 'short_pnl': '0.0', 'short_unrealised_pnl': '0.0', 'long_margin_ratio': '0.09624915', 'long_maint_margin_ratio': '0.01', 'long_pnl': '-0.00169', 'long_unrealised_pnl': '-0.00169', 'long_settled_pnl': '0', 'short_settled_pnl': '0', 'last': '264.08'},
-    {'long_qty': '1', 'long_avail_qty': '1', 'long_margin': '0.04127', 'long_liqui_price': '3.753', 'long_pnl_ratio': '-0.0048473', 'long_avg_cost': '4.126', 'long_settlement_price': '4.126', 'realised_pnl': '-0.0010528', 'short_qty': '1', 'short_avail_qty': '1', 'short_margin': '0.0404', 'short_liqui_price': '4.476', 'short_pnl_ratio': '-0.0097087', 'short_avg_cost': '4.12', 'short_settlement_price': '4.12', 'instrument_id': 'EOS-USDT-200327', 'long_leverage': '10', 'short_leverage': '10', 'created_at': '2020-02-20T06:17:21.890Z', 'updated_at': '2020-02-22T09:53:15.931Z', 'margin_mode': 'fixed', 'short_margin_ratio': '0.09699321', 'short_maint_margin_ratio': '0.01', 'short_pnl': '-4.0E-4', 'short_unrealised_pnl': '-4.0E-4', 'long_margin_ratio': '0.09958778', 'long_maint_margin_ratio': '0.01', 'long_pnl': '-2.0E-4', 'long_unrealised_pnl': '-2.0E-4', 'long_settled_pnl': '0', 'short_settled_pnl': '0', 'last': '4.123'}],
-    [{'long_qty': '0', 'long_avail_qty': '0', 'long_avg_cost': '0', 'long_settlement_price': '0', 'realised_pnl': '0', 'short_qty': '3', 'short_avail_qty': '3', 'short_avg_cost': '4.53509442', 'short_settlement_price': '4.114', 'liquidation_price': '130311.677', 'instrument_id': 'EOS-USD-200327', 'leverage': '10', 'created_at': '2020-02-18T06:42:29.924Z', 'updated_at': '2020-02-22T08:00:16.315Z', 'margin_mode': 'crossed', 'short_margin': '0.72184793', 'short_pnl': '0.60340204', 'short_pnl_ratio': '0.9121617', 'short_unrealised_pnl': '-0.07369376', 'long_margin': '0.0', 'long_pnl': '0.0', 'long_pnl_ratio': '0.0', 'long_unrealised_pnl': '0.0', 'long_settled_pnl': '0', 'short_settled_pnl': '0.6770958', 'last': '4.156'},
-    {'long_qty': '0', 'long_avail_qty': '0', 'long_avg_cost': '75.37', 'long_settlement_price': '75.37', 'realised_pnl': '-0.00029526', 'short_qty': '0', 'short_avail_qty': '0', 'short_avg_cost': '0', 'short_settlement_price': '0', 'liquidation_price': '0.00', 'instrument_id': 'LTC-USDT-200327', 'leverage': '3', 'created_at': '2020-02-22T08:02:07.424Z', 'updated_at': '2020-02-22T08:07:05.078Z', 'margin_mode': 'crossed', 'short_margin': '0.0', 'short_pnl': '0.0', 'short_pnl_ratio': '0.0', 'short_unrealised_pnl': '0.0', 'long_margin': '0.0', 'long_pnl': '0.0', 'long_pnl_ratio': '0.01791165', 'long_unrealised_pnl': '0.0', 'long_settled_pnl': '0', 'short_settled_pnl': '0', 'last': '75.82'}]]}
+    {'code': '0', 'data': [{'adl': '3', 'availPos': '', 'avgPx': '71.957', 'cTime': '1633658403850', 'ccy': 'USDT', 'deltaBS': '', 'deltaPA': '', 'gammaBS': '', 'gammaPA': '', 'imr': '3.3546333333333336', 'instId': 'FIL-USDT-211008', 'instType': 'FUTURES', 'interest': '0', 'last': '71.899', 'lever': '75', 'liab': '', 'liabCcy': '', 'liqPx': '47.79195755944083', 'margin': '', 'mgnMode': 'cross', 'mgnRatio': '33.204733833126696', 'mmr': '2.5159750000000005', 'notionalUsd': '251.66291535000002', 'optVal': '', 'pos': '35', 'posCcy': '', 'posId': '364822665655386114', 'posSide': 'net', 'thetaBS': '', 'thetaPA': '', 'tradeId': '206392', 'uTime': '1633658403850', 'upl': '-0.2519999999999598', 'uplRatio': '-0.0750448184332231', 'vegaBS': '', 'vegaPA': ''}], 'msg': ''}
     返回结果说明：
-    1.币本位合约和usdt本位合约的信息会一起返回。例如holding中第一行返回的是usdt本位合约数据，第二行返回的是币本位合约的数据
-    2.一个币种同时有多头或者空头，也会在一行里面返回数据
+    1.币本位合约和usdt本位合约的信息会一起返回。
+    2.一个币种同时有多头或者空头，会分别返回
 
     本函数输出示例：
-         created_at    instrument_id     last  leverage  liquidation_price  long_avail_qty  long_avg_cost  long_leverage  long_liqui_price  long_maint_margin_ratio  long_margin  long_margin_ratio  long_pnl  long_pnl_ratio  long_qty  long_settled_pnl  long_settlement_price  long_unrealised_pnl margin_mode  realised_pnl  short_avail_qty  short_avg_cost  short_leverage  short_liqui_price  short_maint_margin_ratio  short_margin  short_margin_ratio  short_pnl  short_pnl_ratio  short_qty  short_settled_pnl  short_settlement_price  short_unrealised_pnl                updated_at
-    eth-usdt  2020-02-22T08:02:04.469Z  ETH-USDT-200327  264.090       NaN                NaN             1.0        265.630           10.0           241.070                     0.01     0.027094           0.096762  -0.00154       -0.057975       1.0               0.0                265.630             -0.00154       fixed      0.000518              0.0      265.840000            10.0              0.000                      0.01      0.000000        10000.000000   0.000000         0.065829        0.0           0.000000                 265.840               0.00000  2020-02-22T08:42:02.484Z
-    eos-usdt  2020-02-20T06:17:21.890Z  EOS-USDT-200327    4.127       NaN                NaN             1.0          4.126           10.0             3.753                     0.01     0.041270           0.100024   0.00000        0.000000       1.0               0.0                  4.126              0.00000       fixed     -0.001053              1.0        4.120000            10.0              4.476                      0.01      0.040400            0.096461  -0.000600        -0.014563        1.0           0.000000                   4.120              -0.00060  2020-02-22T09:53:15.931Z
-    eos-usd   2020-02-18T06:42:29.924Z   EOS-USD-200327    4.158      10.0         130311.677             0.0          0.000            NaN               NaN                      NaN     0.000000                NaN   0.00000        0.000000       0.0               0.0                  0.000              0.00000     crossed      0.000000              3.0        4.535094             NaN                NaN                       NaN      0.721674                 NaN   0.601666         0.909537        3.0           0.677096                   4.114              -0.07543  2020-02-22T08:00:16.315Z
-    ltc-usdt  2020-02-22T08:02p:07.424Z  LTC-USDT-200327   75.910       3.0              0.000             0.0         75.370            NaN               NaN                      NaN     0.000000                NaN   0.00000        0.020698       0.0               0.0                 75.370              0.00000     crossed     -0.000295              0.0        0.000000             NaN                NaN                       NaN      0.000000                 NaN   0.000000         0.000000        0.0           0.000000                   0.000               0.00000  2020-02-22T08:07:05.078Z
+    adl      availPos   avgPx         cTime    ccy         deltaBS deltaPA gammaBS gammaPA      imr           instId       instType    interest    last      lever liab liabCcy      liqPx     margin    mgnMode   mgnRatio       mmr    notionalUsd optVal   pos posCcy         posId   posSide thetaBS thetaPA   tradeId         uTime      upl    uplRatio      vegaBS   vegaPA
+    3.0      71.957             1.633658e+12  USDT                                           3.35566    FIL-USDT-211008    FUTURES       0.0      71.891     75.0                  47.791958             cross    33.224279    2.516745   251.734902         35.0         3.648227e+17     net                  206392.0    1.633658e+12   -0.175   -0.052114
     """
     for _ in range(max_try_amount):
         try:
             # 获取数据
-            position_info = exchange.futures_get_position()['holding']
+            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
+            print(df)
             # 整理数据
-            df = pd.DataFrame(sum(position_info, []), dtype=float)
             # 防止账户初始化时出错
-            if "instrument_id" in df.columns:
-                df['index'] = df['instrument_id'].str[:-7].str.lower()
+            if "instId" in df.columns:
+                df['index'] = df['instId'].str.lower()
                 df.set_index(keys='index', inplace=True)
                 df.index.name = None
+                df['instrument_id'] = df['instId']
             return df
         except Exception as e:
             print('通过ccxt的通过futures_get_position获取所有合约的持仓信息，失败，稍后重试。失败原因：\n', e)
@@ -111,7 +100,7 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
 
 
 # ===通过ccxt获取K线数据
-def ccxt_fetch_candle_data(exchange, symbol, time_interval, limit, max_try_amount=5):
+def ccxt_fetch_candle_data(exchange: ccxt.okex5, symbol, time_interval, limit, max_try_amount=5):
     """
     本程序使用ccxt的fetch_ohlcv()函数，获取最新的K线数据，用于实盘
     :param exchange:
@@ -124,7 +113,12 @@ def ccxt_fetch_candle_data(exchange, symbol, time_interval, limit, max_try_amoun
     for _ in range(max_try_amount):
         try:
             # 获取数据
-            data = exchange.fetch_ohlcv(symbol=symbol, timeframe=time_interval, limit=limit)
+            # data = exchange.fetch_ohlcv(symbol=symbol, timeframe=time_interval, limit=limit)
+            data = exchange.publicGetMarketCandles({
+                'instId': symbol,
+                'bar': time_interval,
+                'limit': limit,
+            })['data']
             # 整理数据
             df = pd.DataFrame(data, dtype=float)
             df.rename(columns={0: 'MTS', 1: 'open', 2: 'high',
@@ -141,98 +135,53 @@ def ccxt_fetch_candle_data(exchange, symbol, time_interval, limit, max_try_amoun
     send_dingding_and_raise_error(_)
 
 
-# ===获取指定账户，例如btcusdt合约，目前的现金余额。
-def ccxt_update_account_equity(exchange, symbol, max_try_amount=5):
-    """
-    使用okex私有函数，GET/api/futures/v3/accounts/<underlying>，获取指定币种的账户现金余额。
-    :param exchange:
-    :param underlying:  例如btc-usd，btc-usdt
-    :param max_try_amount:
-    :return:
-    """
-    for _ in range(max_try_amount):
-        try:
-            result = exchange.futures_get_accounts_underlying(params={"underlying": symbol.lower()})
-            return float(result['equity'])
-        except Exception as e:
-            print(e)
-            print('ccxt_update_account_equity函数获取账户可用余额失败，稍后重试')
-            time.sleep(short_sleep_time)
-            pass
-
-
 # =====趋势策略相关函数
 # 根据账户信息、持仓信息，更新symbol_info
 def update_symbol_info(exchange, symbol_info, symbol_config):
     """
-    本函数通过ccxt_fetch_future_account()获取合约账户信息，ccxt_fetch_future_position()获取合约账户持仓信息，并用这些信息更新symbol_config
+    本函数通过private_get_account_balance()获取账户信息，private_get_account_positions()获取账户持仓信息，并用这些信息更新symbol_config
     :param exchange:
     :param symbol_info:
     :param symbol_config:
     :return:
     """
-
+    # 初始化持仓方向.默认为没有持仓
+    symbol_info['持仓方向'] = 0
     # 通过交易所接口获取合约账户信息
-    future_account = ccxt_fetch_future_account(exchange)
+    future_account, balance_of = ccxt_fetch_future_account(exchange)
     # 将账户信息和symbol_info合并
-    if future_account.empty is False:
-        symbol_info['账户权益'] = future_account['equity']
+    symbol_info['账户余额'] = balance_of
 
     # 通过交易所接口获取合约账户持仓信息
     future_position = ccxt_fetch_future_position(exchange)
     # 将持仓信息和symbol_info合并
-    if future_position.empty is False:
+    if not future_position.empty:
         # 去除无关持仓：账户中可能存在其他合约的持仓信息，这些合约不在symbol_config中，将其删除。
         instrument_id_list = [symbol_config[x]['instrument_id'] for x in symbol_config.keys()]
         future_position = future_position[future_position.instrument_id.isin(instrument_id_list)]
+        if future_position.empty:
+            return symbol_info
 
         # 从future_position中获取原始数据
-        symbol_info['最大杠杆'] = future_position['leverage']
+        symbol_info['最大杠杆'] = future_position['lever']
         symbol_info['当前价格'] = future_position['last']
 
-        symbol_info['多头持仓量'] = future_position['long_qty']
-        symbol_info['多头均价'] = future_position['long_avg_cost']
-        symbol_info['多头收益率'] = future_position['long_pnl_ratio']
-        symbol_info['多头收益'] = future_position['long_pnl']
+        symbol_info['持仓量'] = future_position['pos']
+        symbol_info['持仓均价'] = future_position['avgPx']
+        symbol_info['持仓收益率'] = future_position['uplRatio']
+        symbol_info['持仓收益'] = future_position['upl']
+        symbol_info['产品ID'] = future_position['instId']
 
-        symbol_info['空头持仓量'] = future_position['short_qty']
-        symbol_info['空头均价'] = future_position['short_avg_cost']
-        symbol_info['空头收益率'] = future_position['short_pnl_ratio']
-        symbol_info['空头收益'] = future_position['short_pnl']
+        # 当账户是买卖模式的时候,接口返回的持仓数量负数为做空,正数为做多
+        symbol_info['pos'] = future_position['pos']
+        symbol_info.loc[symbol_info['pos'] < 0, '持仓方向'] = -1
+        symbol_info.loc[symbol_info['pos'] > 0, '持仓方向'] = 1
+        del symbol_info['pos']
 
-        # 检验是否同时持有多头和空头
-        temp = symbol_info[(symbol_info['多头持仓量'] > 0) & (symbol_info['空头持仓量'] > 0)]
-        if temp.empty is False:
-            print(list(temp.index), '当前账户同时存在多仓和空仓，请平掉其中至少一个仓位后再运行程序，程序exit')
+        # 检验是否同时持有多头和空头, 买卖模式不会存在同时多头和空头,这里理论来说可以去掉
+        if len(symbol_info[symbol_info.duplicated('产品ID')]) > 1:
+            print(symbol_info['产品ID'], '当前账户同时存在多仓和空仓，请平掉其中至少一个仓位后再运行程序，程序exit')
             exit()
-
-        # 整理原始数据，计算需要的数据
-        # 多头、空头的index
-        long_index = symbol_info[symbol_info['多头持仓量'] > 0].index
-        short_index = symbol_info[symbol_info['空头持仓量'] > 0].index
-        # 账户持仓方向
-        symbol_info.loc[long_index, '持仓方向'] = 1
-        symbol_info.loc[short_index, '持仓方向'] = -1
-        symbol_info['持仓方向'].fillna(value=0, inplace=True)
-        # 账户持仓量
-        symbol_info.loc[long_index, '持仓量'] = symbol_info['多头持仓量']
-        symbol_info.loc[short_index, '持仓量'] = symbol_info['空头持仓量']
-        # 持仓均价
-        symbol_info.loc[long_index, '持仓均价'] = symbol_info['多头均价']
-        symbol_info.loc[short_index, '持仓均价'] = symbol_info['空头均价']
-        # 持仓收益率
-        symbol_info.loc[long_index, '持仓收益率'] = symbol_info['多头收益率']
-        symbol_info.loc[short_index, '持仓收益率'] = symbol_info['空头收益率']
-        # 持仓收益
-        symbol_info.loc[long_index, '持仓收益'] = symbol_info['多头收益']
-        symbol_info.loc[short_index, '持仓收益'] = symbol_info['空头收益']
-        # 删除不必要的列
-        symbol_info.drop(['多头持仓量', '多头均价', '空头持仓量', '空头均价', '多头收益率', '空头收益率', '多头收益', '空头收益'],
-                         axis=1, inplace=True)
-    else:
-        # 当future_position为空时，将持仓方向的控制填充为0，防止之后判定信号时出错
-        symbol_info['持仓方向'].fillna(value=0, inplace=True)
-
     return symbol_info
 
 
@@ -267,9 +216,9 @@ def get_candle_data(exchange, symbol_config, time_interval, run_time, max_try_am
 
         # 判断是否包含最新一根的K线数据。例如当time_interval为15分钟，run_time为14:15时，即判断当前获取到的数据中是否包含14:15这根K线
         # 【其实这段代码可以省略】
-        if time_interval.endswith('m'):
+        if time_interval.endswith('m') or time_interval.endswith('M'):
             _ = df[df['candle_begin_time_GMT8'] == (run_time - timedelta(minutes=int(time_interval[:-1])))]
-        elif time_interval.endswith('h'):
+        elif time_interval.endswith('h') or time_interval.endswith('H'):
             _ = df[df['candle_begin_time_GMT8'] == (run_time - timedelta(hours=int(time_interval[:-1])))]
         else:
             print('time_interval不以m或者h结尾，出错，程序exit')
@@ -290,9 +239,10 @@ def get_candle_data(exchange, symbol_config, time_interval, run_time, max_try_am
 
 
 # 串行获取K线数据
-def single_threading_get_data(exchange, symbol_info, symbol_config, time_interval, run_time, candle_num, max_try_amount=5):
+def single_threading_get_data(exchange, symbol_info, symbol_config, time_interval, run_time, candle_num,
+                              max_try_amount=5):
     """
-    串行逐个获取所有交易对的K线数据，速度较慢。和multi_threading_get_data()对应
+    串行逐个获取所有交易对的K线数据，速度较慢
     若获取数据失败，返回空的dataframe。
     :param exchange:
     :param symbol_info:
@@ -310,7 +260,10 @@ def single_threading_get_data(exchange, symbol_info, symbol_config, time_interva
 
     # 逐个获取symbol对应的K线数据
     for symbol in symbol_config.keys():
-        _, symbol_candle_data[symbol], symbol_info.at[symbol, '信号价格'] = get_candle_data(exchange, symbol_config, time_interval, run_time, max_try_amount, candle_num, symbol)
+        _, symbol_candle_data[symbol], symbol_info.at[symbol, '信号价格'] = get_candle_data(exchange, symbol_config,
+                                                                                            time_interval, run_time,
+                                                                                            max_try_amount, candle_num,
+                                                                                            symbol)
 
     return symbol_candle_data
 
@@ -334,14 +287,17 @@ def calculate_signal(symbol_info, symbol_config, symbol_candle_data):
         # 赋值相关数据
         df = symbol_candle_data[symbol].copy()  # 最新数据
         now_pos = symbol_info.at[symbol, '持仓方向']  # 当前持仓方向
-        avg_price = symbol_info.at[symbol, '持仓均价']  # 当前持仓均价
+        # avg_price = symbol_info.at[symbol, '持仓均价']  # 当前持仓均价
 
         # 需要计算的目标仓位
         target_pos = None
 
         # 根据策略计算出目标交易信号。
         if not df.empty:  # 当原始数据不为空的时候
-            target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df, now_pos, avg_price, symbol_config[symbol]['para'])
+            # target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df, now_pos, avg_price,
+            #                                                                       symbol_config[symbol]['para'])
+            target_pos = getattr(Signals, symbol_config[symbol]['strategy_name'])(df,
+                                                                                  para=symbol_config[symbol]['para'])
         symbol_info.at[symbol, '目标仓位'] = target_pos  # 这行代码似乎可以删除
 
         # 根据目标仓位和实际仓位，计算实际操作，"1": "开多"，"2": "开空"，"3": "平多"， "4": "平空"
@@ -376,63 +332,64 @@ def okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal,
     """
     # 下单参数
     params = {
-        'instrument_id': symbol_config[symbol]["instrument_id"],  # 合约代码
+        'instId': symbol_config[symbol]["instrument_id"],  # 合约代码
+        'tdMode': 'cross',  # 设置为全仓,可以调整    isolated：逐仓    cross：全仓   cash：非保证金
+        'ordType': 'limit',  # 设置为限价单
     }
 
     order_id_list = []
     # 按照交易信号下单
     for order_type in symbol_signal[symbol]:
-        update_price_flag = False  # 当触发限价条件时会设置为True、0
-        for i in range(max_try_amount):
+        num = 0
+        while True:
             try:
+                response = float(
+                    exchange.public_get_market_ticker({"instId": symbol_config[symbol]["instrument_id"]})['data'][0][
+                        'last'])
+                symbol_info.at[symbol, "信号价格"] = response
                 # 当只要开仓或者平仓时，直接下单操作即可。但当本周期即需要平仓，又需要开仓时，需要在平完仓之后，
                 # 重新评估下账户资金，然后根据账户资金计算开仓账户然后开仓。下面这行代码即处理这个情形。
                 # "长度为2的判定"定位【平空，开多】或【平多，开空】两种情形，"下单类型判定"定位 处于开仓的情形。
                 if len(symbol_signal[symbol]) == 2 and order_type in [1, 2]:  # 当两个条件同时满足时，说明当前处于平仓后，需要再开仓的阶段。
                     time.sleep(short_sleep_time)  # 短暂的休息1s，防止之平仓后，账户没有更新
-                    symbol_info.at[symbol, "账户权益"] = ccxt_update_account_equity(exchange, symbol.upper())
+                    _, symbol_info["账户余额"] = ccxt_fetch_future_account(exchange)
 
                 # 确定下单参数
-                params['type'] = str(order_type)
-                params['price'] = float(cal_order_price(symbol_info.at[symbol, "信号价格"], order_type))
-                params['size'] = int(cal_order_size(symbol, symbol_info, symbol_config[symbol]['leverage']))
-
-                if update_price_flag:
-                    # {'instrument_id': 'BTC-USDT-200626',
-                    #  'highest': '7088.5',
-                    #  'lowest': '6674.2',
-                    #  'timestamp': '2020-04-22T06:21:12.441Z'}
-                    # 获取当前限价
-                    response = exchange.futures_get_instruments_instrument_id_price_limit({"instrument_id":symbol_config[symbol]["instrument_id"]})
-                    # 依据下单类型来判定，所用的价格
-                    order_type_tmp = int(params['type'])
-                    # 开多和平空，对应买入合约取最高
-                    if order_type_tmp in [1, 4]:
-                        params['price'] = float(response['highest'])
-                    elif order_type_tmp in [2, 3]:
-                        params['price'] = float(response['lowest'])
-                    update_price_flag = False
+                params['side'] = 'buy' if order_type in [1, 4] else 'sell'
+                params['px'] = float(cal_order_price(response, order_type))
+                params['sz'] = int(cal_order_size(symbol, symbol_info, symbol_config[symbol]['leverage']))
 
                 print('开始下单：', datetime.now())
-                order_info = exchange.futures_post_order(params)
-                order_id_list.append(order_info['order_id'])
+                order_info = exchange.private_post_trade_order(params)
+                ordId = order_info['data'][0]['ordId']
                 print(order_info, '下单完成：', datetime.now())
+                time.sleep(5)  # 等待三秒
 
+                # 获取订单信息
+                state = exchange.private_get_trade_order({'instId': symbol_config[symbol]["instrument_id"],
+                                                          'ordId': ordId})['data'][0]['state']
+
+                # 判断是否成交,如果没有成交撤销挂单,重新获取最新价格下单
+                # canceled：撤单成功  live：等待成交  partially_filled：部分成交   filled：完全成交
+                if state == 'live':
+                    print('订单超过三秒未成交,重新获取价格下单')
+                    exchange.private_post_trade_cancel_order(
+                        {'instId': symbol_config[symbol]["instrument_id"], 'ordId': ordId})
+                    if num >= max_try_amount:
+                        send_dingding_msg('下单未成交次数超过max_try_amount，终止下单，程序不退出')
+                        break
+                    num += 1
+                    time.sleep(2)
+                    continue
+                order_id_list.append(ordId)
                 break
 
             except Exception as e:
                 print(e)
                 print(symbol, '下单失败，稍等后继续尝试')
                 time.sleep(short_sleep_time)
-                '''
-                okex {"error_message":"Order price cannot be more than 103% or less than 97% of the previous minute price","code":32019,"error_code":"32019",
-                "message":"Order price cannot be more than 103% or less than 97% of the previous minute price"}
-                '''
-                # error code 与错误是一一对应的关系，32019代表相关错误
-                if "32019" in str(e):
-                    update_price_flag = True
-
-                if i == (max_try_amount - 1):
+                max_try_amount -= 1
+                if max_try_amount <= 0:
                     print('下单失败次数超过max_try_amount，终止下单')
                     send_dingding_msg('下单失败次数超过max_try_amount，终止下单，程序不退出')
                     # exit() 若在子进程中（Pool）调用okex_future_place_order，触发exit会产生孤儿进程
@@ -464,7 +421,8 @@ def single_threading_place_order(exchange, symbol_info, symbol_config, symbol_si
         # 遍历有交易信号的交易对
         for symbol in symbol_signal.keys():
             # 下单
-            _, order_id_list = okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal, max_try_amount, symbol)
+            _, order_id_list = okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal,
+                                                       max_try_amount, symbol)
 
             # 记录
             for order_id in order_id_list:
@@ -502,10 +460,10 @@ def update_order_info(exchange, symbol_config, symbol_order, max_try_amount=5):
             for i in range(max_try_amount):
                 try:
                     para = {
-                        'instrument_id': symbol_config[symbol_order.at[order_id, 'symbol']]["instrument_id"],
-                        'order_id': order_id
+                        'instId': symbol_config[symbol_order.at[order_id, 'symbol']]["instrument_id"],
+                        'ordId': order_id
                     }
-                    order_info = exchange.futures_get_orders_instrument_id_order_id(para)
+                    order_info = exchange.private_get_trade_order(para)
                     break
                 except Exception as e:
                     print(e)
@@ -516,15 +474,13 @@ def update_order_info(exchange, symbol_config, symbol_order, max_try_amount=5):
                         raise ValueError('重试次数过多，获取订单信息失败，程序退出')
 
             if order_info:
-                symbol_order.at[order_id, "订单状态"] = okex_order_state[order_info["state"]]
-                if okex_order_state[order_info["state"]] == '失败':
-                    print('下单失败')
-                symbol_order.at[order_id, "开仓方向"] = okex_order_type[order_info["type"]]
-                symbol_order.at[order_id, "委托数量"] = order_info["size"]
-                symbol_order.at[order_id, "成交数量"] = order_info["filled_qty"]
-                symbol_order.at[order_id, "委托价格"] = order_info["price"]
-                symbol_order.at[order_id, "成交均价"] = order_info["price_avg"]
-                symbol_order.at[order_id, "委托时间"] = order_info["timestamp"]
+                symbol_order.at[order_id, "订单状态"] = okex_order_state[order_info['data'][0]["state"]]
+                symbol_order.at[order_id, "开仓方向"] = okex_order_type[order_info['data'][0]["posSide"]]
+                symbol_order.at[order_id, "委托数量"] = order_info['data'][0]["sz"]
+                symbol_order.at[order_id, "成交数量"] = order_info['data'][0]["accFillSz"]
+                symbol_order.at[order_id, "委托价格"] = order_info['data'][0]["px"]
+                symbol_order.at[order_id, "成交均价"] = order_info['data'][0]["avgPx"]
+                symbol_order.at[order_id, "委托时间"] = pd.to_datetime(order_info['data'][0]["cTime"], unit='ms')
             else:
                 print('根据订单号获取订单信息失败次数超过max_try_amount，发送钉钉')
 
@@ -602,35 +558,37 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     """
 
     # 获取当前时间
-    now_milliseconds = int(time.time() * 1e3)   #将当前时间转换为毫秒
+    now_milliseconds = int(time.time() * 1e3)
 
     # 每根K线的间隔时间
     time_interval_int = int(time_interval[:-1])  # 若15m，则time_interval_int = 15；若2h，则time_interval_int = 2
     if time_interval.endswith('m'):
         time_segment = time_interval_int * 60 * 1000  # 15分钟 * 每分钟60s
-    elif time_interval.endswith('h'):
+    elif time_interval.endswith('H'):
         time_segment = time_interval_int * 60 * 60 * 1000  # 2小时 * 每小时60分钟 * 每分钟60s
-    else:
-        print('time_interval格式不符合规范。程序退出！')
-        exit()
 
     # 计算开始和结束的时间
-    end = now_milliseconds - time_segment
-    since = end - max_len * time_segment
+    since = now_milliseconds - time_segment
+    end = since - max_len * time_segment
 
     # 循环获取历史数据
     all_kline_data = []
-    while end - since >= time_segment:
+    while True:
         kline_data = []
-        
+        params = {
+            'instId': symbol,
+            'bar': time_interval,
+            'after': since,
+            'limit': '100'
+        }
+
         # 获取K线使，要多次尝试
         for i in range(max_try_amount):
             try:
-                kline_data = exchange.fetch_ohlcv(symbol=symbol, since=since, timeframe=time_interval)
-                # print(kline_data)
+                kline_data = exchange.public_get_market_candles(params=params)['data']
                 break
             except Exception as e:
-                print('出错，' + str(e))
+                print(e)
                 time.sleep(medium_sleep_time)
                 if i == (max_try_amount - 1):
                     _ = '【获取需要交易币种的历史数据】阶段，fetch_okex_symbol_history_candle_data函数中，' \
@@ -638,6 +596,8 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
                     send_dingding_and_raise_error(_)
 
         if kline_data:
+            if int(kline_data[-1][0]) < end:
+                break
             since = kline_data[-1][0]  # 更新since，为下次循环做准备
             all_kline_data += kline_data
         else:
@@ -648,16 +608,14 @@ def fetch_okex_symbol_history_candle_data(exchange, symbol, time_interval, max_l
     df = pd.DataFrame(all_kline_data, dtype=float)
     df.rename(columns={0: 'MTS', 1: 'open', 2: 'high', 3: 'low', 4: 'close', 5: 'volume'}, inplace=True)
     df['candle_begin_time'] = pd.to_datetime(df['MTS'], unit='ms')
-    df['candle_begin_time_GMT8'] = df['candle_begin_time'] + timedelta(hours=8) # 北京时间 = 格林威治时间 + 8小时
+    df['candle_begin_time_GMT8'] = df['candle_begin_time'] + timedelta(hours=8)
     df = df[['candle_begin_time_GMT8', 'open', 'high', 'low', 'close', 'volume']]
 
     # 删除重复的数据
     df.drop_duplicates(subset=['candle_begin_time_GMT8'], keep='last', inplace=True)
     df.reset_index(drop=True, inplace=True)
 
-    # 为了保险起见，去掉最后一行最新的数据  #为什么要去掉？最后一个K线的数据可能不全，可能会导致错误。
-    # print(df.head(2))
-    # print(df.tail(2))
+    # 为了保险起见，去掉最后一行最新的数据
     df = df[:-1]
 
     print(symbol, '获取历史数据行数：', len(df))
@@ -731,12 +689,12 @@ def cal_order_size(symbol, symbol_info, leverage, volatility_ratio=0.98):
     # 当账户目前有持仓的时候，必定是要平仓，所以直接返回持仓量即可
     hold_amount = symbol_info.at[symbol, "持仓量"]
     if pd.notna(hold_amount):  # 不为空
-        return hold_amount
+        return abs(hold_amount)
 
     # 当账户没有持仓时，是开仓
     price = float(symbol_info.at[symbol, "信号价格"])
     coin_value = coin_value_table[symbol]
-    e = float(symbol_info.loc[symbol, "账户权益"])
+    e = float(symbol_info.loc[symbol, "账户余额"])
     # 不超过账户最大杠杆
     l = min(float(leverage), float(symbol_info.at[symbol, "最大杠杆"]))
     size = math.floor(e * l * volatility_ratio / (price * coin_value))
@@ -780,7 +738,8 @@ n    :param secret: 你的secret，即安全设置加签当中的那个密钥
         url = 'https://oapi.dingtalk.com/robot/send?access_token=' + robot_id + \
               '&timestamp=' + timestamp + '&sign=' + sign_str
         body = json.dumps(msg)
-        requests.post(url, data=body, headers=headers, timeout=10)
+        r = requests.post(url, data=body, headers=headers, timeout=10)
+        print(r.text)
         print('成功发送钉钉')
     except Exception as e:
         print("发送钉钉失败:", e)

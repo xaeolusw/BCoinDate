@@ -1,5 +1,6 @@
 """
-《邢不行-2020新版|Python数字货币量化投资课程》
+更新时间：2021-10-08
+《邢不行|Python数字货币量化投资课程》
 无需编程基础，助教答疑服务，专属策略网站，一旦加入，永续更新。
 课程详细介绍：https://quantclass.cn/crypto/class
 邢不行微信: xbx9025
@@ -38,7 +39,8 @@ coin_value_table = {
     "xrp-usdt": 100,
     "etc-usdt": 10,
     "bsv-usdt": 1,
-    "trx-usdt": 1000}
+    "trx-usdt": 1000,
+    "fil-usdt": 0.1}
 
 
 # sleep时间配置
