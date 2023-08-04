@@ -39,12 +39,63 @@ def ccxt_fetch_future_account(exchange, max_try_amount=5):
     本程序使用okex5中"获取资金账户余额"、"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
     使用ccxt函数：private_get_account_balance() 与 private_get_account_positions()
     """
-    for _ in range(max_try_amount):
-        try:
-            balance_of = float(
-                exchange.private_get_account_balance({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
-            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
 
+    for _try_time in range(max_try_amount):
+        try:
+            print('通过ccxt的private_get_account_balance获取所有合约账户信息，尝试次数：', _try_time + 1)
+            #exchange.private_get_account_balance()
+            #  {
+            #     'code': '0', 
+            #     'data': [
+            #         {
+            #             'adjEq': '', 
+            #             'details': [
+            #                 {
+            #                     'availBal': '34.66', 
+            #                     'availEq': '34.66', 
+            #                     'cashBal': '34.66', 
+            #                     'ccy': 'USDT', 
+            #                     'crossLiab': '', 
+            #                     'disEq': '34.6364312', 
+            #                     'eq': '34.66', 
+            #                     'eqUsd': '34.6364312', 
+            #                     'fixedBal': '0', 
+            #                     'frozenBal': '0', 
+            #                     'interest': '', 
+            #                     'isoEq': '0', 
+            #                     'isoLiab': '', 
+            #                     'isoUpl': '0', 
+            #                     'liab': '', 
+            #                     'maxLoan': '', 
+            #                     'mgnRatio': '', 
+            #                     'notionalLever': '0', 
+            #                     'ordFrozen': '0', 
+            #                     'spotInUseAmt': '', 
+            #                     'stgyEq': '0', 
+            #                     'twap': '0', 
+            #                     'uTime': '1690964742627', 
+            #                     'upl': '0', 
+            #                     'uplLiab': ''
+            #                 }
+            #             ], 
+            #             'imr': '', 
+            #             'isoEq': '0', 
+            #             'mgnRatio': '', 
+            #             'mmr': '', 
+            #             'notionalUsd': '', 
+            #             'ordFroz': '', 
+            #             'totalEq': '34.6364312', 
+            #             'uTime': '1691139445709'
+            #         }
+            #     ], 
+            #     'msg': ''
+            # }
+            print(exchange.private_get_account_balance())#({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
+            # balance_of = float(
+            #     exchange.private_get_account_balance({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
+            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
+            print(df)
+            exit()
             if not df.empty:
                 df.set_index('posId', drop=True, inplace=True)
                 df.replace('', 0, inplace=True)
@@ -55,8 +106,8 @@ def ccxt_fetch_future_account(exchange, max_try_amount=5):
             print('通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败，稍后重试：\n', e)
             time.sleep(medium_sleep_time)
 
-    _ = '通过ccxt的通过futures_get_accounts获取余额与持仓信息，失败次数过多，程序Raise Error'
-    send_dingding_and_raise_error(_)
+    _error = '通过ccxt的通过futures_get_accounts获取余额与持仓信息，失败次数过多，程序Raise Error'
+    send_dingding_and_raise_error(_error)
 
 
 # ===通过ccxt、交易所接口获取合约账户持仓信息
@@ -151,7 +202,7 @@ def update_symbol_info(exchange, symbol_info, symbol_config):
     future_account, balance_of = ccxt_fetch_future_account(exchange)
     # 将账户信息和symbol_info合并
     symbol_info['账户余额'] = balance_of
-
+    exit()
     # 通过交易所接口获取合约账户持仓信息
     future_position = ccxt_fetch_future_position(exchange)
     # 将持仓信息和symbol_info合并

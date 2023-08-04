@@ -75,16 +75,16 @@ symbol_config = {
 
 def main():
     # =====获取需要交易币种的历史数据=====
-    max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
-    symbol_candle_data = dict()  # 用于存储K线数据
-    # 遍历获取币种历史数据
-    for symbol in symbol_config.keys():
-        # 获取币种的历史数据，会删除最新一行的数据
-        symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
-                                                                           symbol_config[symbol]['instrument_id'],
-                                                                           time_interval, max_len=max_len)
-        time.sleep(medium_sleep_time)
-    # ===进入每次的循环
+    # max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
+    # symbol_candle_data = dict()  # 用于存储K线数据
+    # # 遍历获取币种历史数据
+    # for symbol in symbol_config.keys():
+    #     # 获取币种的历史数据，会删除最新一行的数据
+    #     symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
+    #                                                                        symbol_config[symbol]['instrument_id'],
+    #                                                                        time_interval, max_len=max_len)
+    #     time.sleep(medium_sleep_time)
+    # # ===进入每次的循环
     while True:
         # =获取持仓数据
         # 初始化symbol_info，在每次循环开始时都初始化
@@ -95,6 +95,7 @@ def main():
 
         print('\nsymbol_info:\n', symbol_info, '\n')
 
+        exit()
         # =获取策略执行时间，并sleep至该时间
         run_time = sleep_until_run_time(time_interval)
 

@@ -90,7 +90,7 @@ def main():
         symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)  # 转化为dataframe
 
         list = exchange.account()
-        list = list[0]['details']
+        
         print(list)
         list = exchange.private_get_account_positions()
         print(list)
