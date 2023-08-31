@@ -38,70 +38,62 @@ def ccxt_fetch_future_account(exchange, max_try_amount=5):
 
     本程序使用okex5中"获取资金账户余额"、"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
     使用ccxt函数：private_get_account_balance() 与 private_get_account_positions()
+    exchange.private_get_account_balance()
+    {
+        'code': '0', 
+        'data': [
+            {
+                'adjEq': '', 
+                'details': [
+                    {
+                        'availBal': '34.66', 
+                        'availEq': '34.66', 
+                        'cashBal': '34.66', 
+                        'ccy': 'USDT', 
+                        'crossLiab': '', 
+                        'disEq': '34.6364312', 
+                        'eq': '34.66', 
+                        'eqUsd': '34.6364312', 
+                        'fixedBal': '0', 
+                        'frozenBal': '0', 
+                        'interest': '', 
+                        'isoEq': '0', 
+                        'isoLiab': '', 
+                        'isoUpl': '0', 
+                        'liab': '', 
+                        'maxLoan': '', 
+                        'mgnRatio': '', 
+                        'notionalLever': '0', 
+                        'ordFrozen': '0', 
+                        'spotInUseAmt': '', 
+                        'stgyEq': '0', 
+                        'twap': '0', 
+                        'uTime': '1690964742627', 
+                        'upl': '0', 
+                        'uplLiab': ''
+                    }
+                ], 
+                'imr': '', 
+                'isoEq': '0', 
+                'mgnRatio': '', 
+                'mmr': '', 
+                'notionalUsd': '', 
+                'ordFroz': '', 
+                'totalEq': '34.6364312', 
+                'uTime': '1691139445709'
+            }
+        ], 
+        'msg': ''
+    }
     """
 
     for _try_time in range(max_try_amount):
         try:
             print('通过ccxt的private_get_account_balance获取所有合约账户信息，尝试次数：', _try_time + 1)
-            #exchange.private_get_account_balance()
-            #  {
-            #     'code': '0', 
-            #     'data': [
-            #         {
-            #             'adjEq': '', 
-            #             'details': [
-            #                 {
-            #                     'availBal': '34.66', 
-            #                     'availEq': '34.66', 
-            #                     'cashBal': '34.66', 
-            #                     'ccy': 'USDT', 
-            #                     'crossLiab': '', 
-            #                     'disEq': '34.6364312', 
-            #                     'eq': '34.66', 
-            #                     'eqUsd': '34.6364312', 
-            #                     'fixedBal': '0', 
-            #                     'frozenBal': '0', 
-            #                     'interest': '', 
-            #                     'isoEq': '0', 
-            #                     'isoLiab': '', 
-            #                     'isoUpl': '0', 
-            #                     'liab': '', 
-            #                     'maxLoan': '', 
-            #                     'mgnRatio': '', 
-            #                     'notionalLever': '0', 
-            #                     'ordFrozen': '0', 
-            #                     'spotInUseAmt': '', 
-            #                     'stgyEq': '0', 
-            #                     'twap': '0', 
-            #                     'uTime': '1690964742627', 
-            #                     'upl': '0', 
-            #                     'uplLiab': ''
-            #                 }
-            #             ], 
-            #             'imr': '', 
-            #             'isoEq': '0', 
-            #             'mgnRatio': '', 
-            #             'mmr': '', 
-            #             'notionalUsd': '', 
-            #             'ordFroz': '', 
-            #             'totalEq': '34.6364312', 
-            #             'uTime': '1691139445709'
-            #         }
-            #     ], 
-            #     'msg': ''
-            # }
-            print(exchange.private_get_account_balance())#({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
-            # balance_of = float(
-            #     exchange.private_get_account_balance({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal'])
-            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
-            print(df)
-            exit()
-            if not df.empty:
-                df.set_index('posId', drop=True, inplace=True)
-                df.replace('', 0, inplace=True)
-                return df, balance_of
-            else:
-                return pd.DataFrame(), balance_of
+            balance_of = float(
+                exchange.private_get_account_balance({'ccy': 'USDT'})['data'][0]['details'][0]['cashBal']) #获取帐户余额（USDT）;
+            
+            return balance_of
         except Exception as e:
             print('通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败，稍后重试：\n', e)
             time.sleep(medium_sleep_time)
@@ -116,24 +108,100 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
     :param exchange:
     :param max_try_amount:
     :return:
-    本程序使用okex5中"获取资金账户余额"、"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
-    使用ccxt函数：private_get_account_balance() 与 private_get_account_positions()
-
+    本程序使用okex5中"查看持仓信息"接口，获取账户USDT的余额与持仓信息。
+    使用ccxt函数：private_get_account_positions()
     接口返回数据格式样例：
-    {'code': '0', 'data': [{'adl': '3', 'availPos': '', 'avgPx': '71.957', 'cTime': '1633658403850', 'ccy': 'USDT', 'deltaBS': '', 'deltaPA': '', 'gammaBS': '', 'gammaPA': '', 'imr': '3.3546333333333336', 'instId': 'FIL-USDT-211008', 'instType': 'FUTURES', 'interest': '0', 'last': '71.899', 'lever': '75', 'liab': '', 'liabCcy': '', 'liqPx': '47.79195755944083', 'margin': '', 'mgnMode': 'cross', 'mgnRatio': '33.204733833126696', 'mmr': '2.5159750000000005', 'notionalUsd': '251.66291535000002', 'optVal': '', 'pos': '35', 'posCcy': '', 'posId': '364822665655386114', 'posSide': 'net', 'thetaBS': '', 'thetaPA': '', 'tradeId': '206392', 'uTime': '1633658403850', 'upl': '-0.2519999999999598', 'uplRatio': '-0.0750448184332231', 'vegaBS': '', 'vegaPA': ''}], 'msg': ''}
+    {
+        'code': '0', 
+        'data': [
+            {
+                'adl': '5', 
+                'availPos': '1', 
+                'avgPx': '1701.27', 
+                'baseBal': '', 
+                'baseBorrowed': '', 
+                'baseInterest': '', 
+                'bizRefId': '', 
+                'bizRefType': '', 
+                'cTime': '1693454176011', 
+                'ccy': 'USDT', 
+                'closeOrderAlgo': [], 
+                'deltaBS': '', 
+                'deltaPA': '', 
+                'fee': '', 
+                'fundingFee': '', 
+                'gammaBS': '', 
+                'gammaPA': '', 
+                'idxPx': '1701.31', 
+                'imr': '', 
+                'instId': 'ETH-USDT-230929', 
+                'instType': 'FUTURES', 
+                'interest': '', 
+                'last': '1704.21', 
+                'lever': '10', 
+                'liab': '', 
+                'liabCcy': '', 
+                'liqPenalty': '', 
+                'liqPx': '1538.0742893018582', 
+                'margin': '17.0127', 
+                'markPx': '1703.76', 
+                'mgnMode': 'isolated', 
+                'mgnRatio': '22.514516911615093', 
+                'mmr': '0.681504', 
+                'notionalUsd': '170.40496392', 
+                'optVal': '', 
+                'pendingCloseOrdLiabVal': '', 
+                'pnl': '', 
+                'pos': '1', 
+                'posCcy': '', 
+                'posId': '617326789572333579', 
+                'posSide': 'long', 
+                'quoteBal': '', 
+                'quoteBorrowed': '', 
+                'quoteInterest': '', 
+                'realizedPnl': '', 
+                'spotInUseAmt': '', 
+                'spotInUseCcy': '', 
+                'thetaBS': '', 
+                'thetaPA': '', 
+                'tradeId': 
+                '1638985', 
+                'uTime': '1693454176011', 
+                'upl': '0.2490000000000009', 
+                'uplLastPx': '0.2940000000000055', 
+                'uplRatio': '0.0146361247773719', 
+                'uplRatioLastPx': 
+                '0.0172812075684647', 
+                'usdPx': '', 
+                'vegaBS': '', 
+                'vegaPA': ''
+            }
+        ], 
+        'msg': ''
+    }
     返回结果说明：
     1.币本位合约和usdt本位合约的信息会一起返回。
     2.一个币种同时有多头或者空头，会分别返回
-
-    本函数输出示例：
-    adl      availPos   avgPx         cTime    ccy         deltaBS deltaPA gammaBS gammaPA      imr           instId       instType    interest    last      lever liab liabCcy      liqPx     margin    mgnMode   mgnRatio       mmr    notionalUsd optVal   pos posCcy         posId   posSide thetaBS thetaPA   tradeId         uTime      upl    uplRatio      vegaBS   vegaPA
-    3.0      71.957             1.633658e+12  USDT                                           3.35566    FIL-USDT-211008    FUTURES       0.0      71.891     75.0                  47.791958             cross    33.224279    2.516745   251.734902         35.0         3.648227e+17     net                  206392.0    1.633658e+12   -0.175   -0.052114
     """
     for _ in range(max_try_amount):
         try:
             # 获取数据
-            df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)
+            # df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)  #会报错：could not convert string to float: ''，修改如下：
+            df = pd.DataFrame(exchange.private_get_account_positions()['data'])
+            print(df.columns)
+            # exit()
+            df = df[['instId','lever','last','pos','avgPx', 'uplRatio', 'upl']]
+            
+            # print(df)
+            # exit()
+            def convert_to_float(x):
+                try:
+                    return float(x)
+                except:
+                    return x
+            df = df.applymap(convert_to_float)
             print(df)
+            # exit()
             # 整理数据
             # 防止账户初始化时出错
             if "instId" in df.columns:
@@ -199,12 +267,15 @@ def update_symbol_info(exchange, symbol_info, symbol_config):
     # 初始化持仓方向.默认为没有持仓
     symbol_info['持仓方向'] = 0
     # 通过交易所接口获取合约账户信息
-    future_account, balance_of = ccxt_fetch_future_account(exchange)
+    balance_of = ccxt_fetch_future_account(exchange)
     # 将账户信息和symbol_info合并
     symbol_info['账户余额'] = balance_of
-    exit()
+
     # 通过交易所接口获取合约账户持仓信息
     future_position = ccxt_fetch_future_position(exchange)
+    print(future_position)
+    print(symbol_info)
+    exit()
     # 将持仓信息和symbol_info合并
     if not future_position.empty:
         # 去除无关持仓：账户中可能存在其他合约的持仓信息，这些合约不在symbol_config中，将其删除。
@@ -233,6 +304,9 @@ def update_symbol_info(exchange, symbol_info, symbol_config):
         if len(symbol_info[symbol_info.duplicated('产品ID')]) > 1:
             print(symbol_info['产品ID'], '当前账户同时存在多仓和空仓，请平掉其中至少一个仓位后再运行程序，程序exit')
             exit()
+        print('1')
+        print(symbol_info)
+        exit()
     return symbol_info
 
 

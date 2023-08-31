@@ -1,10 +1,11 @@
-import ccxt
-import os
+
 from time import sleep
-import pandas as pd
+
 from datetime import datetime
 from Function import *
-from Config import *
+
+from GlobalVar import *
+
 
 pd.set_option('display.max_rows', 1000)
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
@@ -12,48 +13,9 @@ pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
 pd.set_option('display.unicode.ambiguous_as_wide', True)
 pd.set_option('display.unicode.east_asian_width', True)
 
-# 测试时ccxt版本为1.27.28。若不是此版本，可能会报错，可能性很低。print(ccxt.__version__)可以查看ccxt版本。
-
 # =====配置运行相关参数=====
-#根据操作系统设置数据库路径
-if os.name == 'nt':
-    global_database_path = 'D:\\PythonProjects\\coin_data\\getKey.csv'
-elif os.name == 'posix':
-    global_database_path = '/Volumes/USB-DISK/PythonProjects/coin_data/getKey.csv'
-else:
-    print('操作系统不支持')
-    exit()
-
-df_key = pd.read_csv(
-    filepath_or_buffer = global_database_path, 
-    encoding='utf8', 
-    sep=',',
-) 
-
 # =执行的时间间隔
-time_interval = '15m'  # 目前支持5m，15m，30m，1h，2h等。得okex支持的K线才行。最好不要低于5m
-
-# =钉钉
-# 在一个钉钉群中，可以创建多个钉钉机器人。
-# 建议单独建立一个报错机器人，该机器人专门发报错信息。请务必将报错机器人在id和secret放到function.send_dingding_msg的默认参数中。
-robot_id = df_key['robot_id'][0]
-secret = df_key['robot_secret'][0] 
-robot_id_secret = [robot_id, secret]
-
-# =交易所配置
-OKEX_CONFIG = {
-    'proxies': {
-        'http': 'http://127.0.0.1:7890',
-        'https': 'http://127.0.0.1:7890'
-    },
-    'apiKey': df_key['apiKey'][0],
-    'secret': df_key['api_secret'][0],
-    'password': df_key['password'][0],
-    'timeout': exchange_timeout,
-    'rateLimit': 10,
-    # 'hostname': 'okex.me',  # 无法fq的时候启用
-    'enableRateLimit': False}
-exchange = ccxt.okex(OKEX_CONFIG)
+time_interval = '5m'  # 目前支持5m，15m，30m，1h，2h等。得okex支持的K线才行。最好不要低于5m
 
 # =====配置交易相关参数=====
 # 更新需要交易的合约、策略参数、下单量等配置信息
@@ -86,32 +48,17 @@ def main():
 
         # =获取持仓数据
         # 初始化symbol_info，在每次循环开始时都初始化
-        symbol_info_columns = ['账户权益', '持仓方向', '持仓量', '持仓收益率', '持仓收益', '持仓均价', '当前价格', '最大杠杆']
+        symbol_info_columns = ['账户余额', '持仓方向', '持仓量', '持仓收益率', '持仓收益', '持仓均价', '当前价格', '最大杠杆']
         symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)  # 转化为dataframe
-
-        list = exchange.account()
-        
-        print(list)
-        list = exchange.private_get_account_positions()
-        print(list)
-        # # 更新账户信息symbol_info
-        # for _ in range(5):
-        #     try:
-        #         future_info = exchange.account()['info']
-        #         df = pd.DataFrame(future_info, dtype=float).T  # 将数据转化为df格式
-        #         return df
-        #     except Exception as e:
-        #         print('通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败，稍后重试：\n', e)
-        #         time.sleep(medium_sleep_time)
-
-        # _ = '通过ccxt的通过futures_get_accounts获取所有合约账户信息，失败次数过多，程序Raise Error'
-
-        
-        exit()
+        # 更新账户信息symbol_info
+        # print(symbol_info)
+        # exit()
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
+
         print('\nsymbol_info:\n', symbol_info, '\n')
 
         exit()
+
         # =获取策略执行时间，并sleep至该时间
         run_time = sleep_until_run_time(time_interval)
 
@@ -119,7 +66,8 @@ def main():
         exchange.timeout = 1000  # 即将获取最新数据，临时将timeout设置为1s，加快获取数据速度
         candle_num = 10  # 只获取最近candle_num根K线数据，可以获得更快的速度
         # 获取数据
-        recent_candle_data = single_threading_get_data(exchange, symbol_info, symbol_config, time_interval, run_time,
+        recent_candle_data = single_threading_get_data(exchange, symbol_info, symbol_config, time_interval,
+                                                       run_time,
                                                        candle_num)
         for symbol in symbol_config.keys():
             print(recent_candle_data[symbol].tail(2))
@@ -142,17 +90,13 @@ def main():
         exchange.timeout = exchange_timeout  # 下单时需要增加timeout的时间，将timout恢复正常
         symbol_order = pd.DataFrame()
         if symbol_signal:
-            symbol_order = single_threading_place_order(exchange, symbol_info, symbol_config, symbol_signal)  # 单线程下单
+            symbol_order = single_threading_place_order(exchange, symbol_info, symbol_config,
+                                                        symbol_signal)  # 单线程下单
             print('下单记录：\n', symbol_order)
-
-            # 更新订单信息，查看是否完全成交
-            time.sleep(short_sleep_time)  # 休息一段时间再更新订单信息
-            symbol_order = update_order_info(exchange, symbol_config, symbol_order)
-            print('更新下单记录：', '\n', symbol_order)
-
         # 重新更新账户信息symbol_info
         time.sleep(long_sleep_time)  # 休息一段时间再更新
-        symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)
+        # symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)
+        symbol_info = pd.DataFrame(index=symbol_config.keys())
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
         print('\nsymbol_info:\n', symbol_info, '\n')
 
