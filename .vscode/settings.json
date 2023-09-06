@@ -1,6 +1,7 @@
 {
     "typescript.tsserver.web.projectWideIntellisense.suppressSemanticErrors": true,
     "files.autoSave": "onFocusChange",
-    "editor.fontSize": 14,
-    "terminal.integrated.cursorStyle": "line"
+    "editor.fontSize": 20,
+    "terminal.integrated.cursorStyle": "line",
+    "editor.accessibilityPageSize": 20
 }
