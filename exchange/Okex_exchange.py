@@ -1,9 +1,7 @@
 
 from time import sleep
-
 from datetime import datetime
 from Function import *
-
 from GlobalVar import *
 
 
@@ -20,11 +18,11 @@ time_interval = '5m'  # 目前支持5m，15m，30m，1h，2h等。得okex支持�
 # =====配置交易相关参数=====
 # 更新需要交易的合约、策略参数、下单量等配置信息
 symbol_config = {
-    'btc-usdt': {'instrument_id': 'BTC-USDT-230929',
-                 'leverage': '3',
-                 'strategy_name': 'real_signal_simple_bolling',  # 不同币种可以使用不同的策略
-                 'para': [20, 2]},
-    'eth-usdt': {'instrument_id': 'ETH-USDT-230929',  # 合约代码，当更换合约的时候需要手工修改
+    # 'btc-usdt-230929': {'instrument_id': 'BTC-USDT-230929',
+    #              'leverage': '3',
+    #              'strategy_name': 'real_signal_simple_bolling',  # 不同币种可以使用不同的策略
+    #              'para': [20, 2]},
+    'eth-usdt-230929': {'instrument_id': 'ETH-USDT-230929',  # 合约代码，当更换合约的时候需要手工修改
                  'leverage': '3',  # 控制实际交易的杠杆倍数，在实际交易中可以自己修改。此处杠杆数，必须小于页面上的最大杠杆数限制
                  'strategy_name': 'real_signal_simple_bolling',  # 使用的策略的名称
                  'para': [20, 2]},  # 策略参数
@@ -33,15 +31,15 @@ symbol_config = {
 
 def main():
     # =====获取需要交易币种的历史数据=====
-    # max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
-    # symbol_candle_data = dict()  # 用于存储K线数据
-    # # 遍历获取币种历史数据
-    # for symbol in symbol_config.keys():
-    #     # 获取币种的历史数据，会删除最新一行的数据
-    #     symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
-    #                                                                        symbol_config[symbol]['instrument_id'],
-    #                                                                        time_interval, max_len=max_len)
-    #     time.sleep(medium_sleep_time)
+    max_len = 1000  # 设定最多收集多少根K线，okex不能超过1440根
+    symbol_candle_data = dict()  # 用于存储K线数据
+    # 遍历获取币种历史数据
+    for symbol in symbol_config.keys():
+        # 获取币种的历史数据，会删除最新一行的数据
+        symbol_candle_data[symbol] = fetch_okex_symbol_history_candle_data(exchange,
+                                                                           symbol_config[symbol]['instrument_id'],
+                                                                           time_interval, max_len=max_len)
+        time.sleep(medium_sleep_time)
     
     # ===进入每次的循环
     while True:
@@ -54,10 +52,8 @@ def main():
         # print(symbol_info)
         # exit()
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
-
+        
         print('\nsymbol_info:\n', symbol_info, '\n')
-
-        exit()
 
         # =获取策略执行时间，并sleep至该时间
         run_time = sleep_until_run_time(time_interval)
@@ -74,7 +70,8 @@ def main():
 
         # 将symbol_candle_data和最新获取的recent_candle_data数据合并
         for symbol in symbol_config.keys():
-            df = symbol_candle_data[symbol].append(recent_candle_data[symbol], ignore_index=True)
+            # df = symbol_candle_data[symbol].append(recent_candle_data[symbol], ignore_index=True)    #新版本没有append函数了
+            df = pd.concat([symbol_candle_data[symbol], recent_candle_data[symbol]], axis=0, ignore_index=True) #注意concat是pd的函数，不是实例的
             df.drop_duplicates(subset=['candle_begin_time_GMT8'], keep='last', inplace=True)
             df.sort_values(by='candle_begin_time_GMT8', inplace=True)  # 排序，理论上这步应该可以省略，加快速度
             df = df.iloc[-max_len:]  # 保持最大K线数量不会超过max_len个

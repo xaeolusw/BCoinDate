@@ -117,7 +117,7 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
             {
                 'adl': '5', 
                 'availPos': '1', 
-                'avgPx': '1701.27', 
+                'avgPx': '1701.27',     #持仓均价
                 'baseBal': '', 
                 'baseBorrowed': '', 
                 'baseInterest': '', 
@@ -134,11 +134,11 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
                 'gammaPA': '', 
                 'idxPx': '1701.31', 
                 'imr': '', 
-                'instId': 'ETH-USDT-230929', 
+                'instId': 'ETH-USDT-230929',  #产品ID
                 'instType': 'FUTURES', 
-                'interest': '', 
-                'last': '1704.21', 
-                'lever': '10', 
+                'interest': ''ID
+                'last': '1704.21',  #当前价格
+                'lever': '10',  #最大杠杆
                 'liab': '', 
                 'liabCcy': '', 
                 'liqPenalty': '', 
@@ -152,7 +152,7 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
                 'optVal': '', 
                 'pendingCloseOrdLiabVal': '', 
                 'pnl': '', 
-                'pos': '1', 
+                'pos': '1',     #持仓量
                 'posCcy': '', 
                 'posId': '617326789572333579', 
                 'posSide': 'long', 
@@ -167,9 +167,9 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
                 'tradeId': 
                 '1638985', 
                 'uTime': '1693454176011', 
-                'upl': '0.2490000000000009', 
+                'upl': '0.2490000000000009',    #持仓收益
                 'uplLastPx': '0.2940000000000055', 
-                'uplRatio': '0.0146361247773719', 
+                'uplRatio': '0.0146361247773719',   #持仓收益率
                 'uplRatioLastPx': 
                 '0.0172812075684647', 
                 'usdPx': '', 
@@ -188,22 +188,18 @@ def ccxt_fetch_future_position(exchange, max_try_amount=5):
             # 获取数据
             # df = pd.DataFrame(exchange.private_get_account_positions()['data'], dtype=float)  #会报错：could not convert string to float: ''，修改如下：
             df = pd.DataFrame(exchange.private_get_account_positions()['data'])
-            print(df.columns)
-            # exit()
-            df = df[['instId','lever','last','pos','avgPx', 'uplRatio', 'upl']]
+
+            df = df[['instId','pos', 'upl', 'uplRatio', 'avgPx','last','lever']] #选择特定列。
             
-            # print(df)
-            # exit()
             def convert_to_float(x):
                 try:
                     return float(x)
                 except:
                     return x
             df = df.applymap(convert_to_float)
-            print(df)
-            # exit()
             # 整理数据
             # 防止账户初始化时出错
+
             if "instId" in df.columns:
                 df['index'] = df['instId'].str.lower()
                 df.set_index(keys='index', inplace=True)
@@ -273,19 +269,27 @@ def update_symbol_info(exchange, symbol_info, symbol_config):
 
     # 通过交易所接口获取合约账户持仓信息
     future_position = ccxt_fetch_future_position(exchange)
-    print(future_position)
-    print(symbol_info)
-    exit()
+    # print(future_position)
+    # print(symbol_info)
+    # exit()
     # 将持仓信息和symbol_info合并
     if not future_position.empty:
         # 去除无关持仓：账户中可能存在其他合约的持仓信息，这些合约不在symbol_config中，将其删除。
+        
         instrument_id_list = [symbol_config[x]['instrument_id'] for x in symbol_config.keys()]
         future_position = future_position[future_position.instrument_id.isin(instrument_id_list)]
+
+        # print(instrument_id_list)
+        # print(future_position)
         if future_position.empty:
             return symbol_info
 
+
         # 从future_position中获取原始数据
         symbol_info['最大杠杆'] = future_position['lever']
+        # print(symbol_info['最大杠杆'])
+        # print(future_position['lever'])
+        # exit()
         symbol_info['当前价格'] = future_position['last']
 
         symbol_info['持仓量'] = future_position['pos']
@@ -304,9 +308,7 @@ def update_symbol_info(exchange, symbol_info, symbol_config):
         if len(symbol_info[symbol_info.duplicated('产品ID')]) > 1:
             print(symbol_info['产品ID'], '当前账户同时存在多仓和空仓，请平掉其中至少一个仓位后再运行程序，程序exit')
             exit()
-        print('1')
-        print(symbol_info)
-        exit()
+
     return symbol_info
 
 
@@ -622,20 +624,20 @@ def next_run_time(time_interval, ahead_seconds=5):
     :param ahead_seconds: 预留的目标时间和当前时间的间隙
     :return: 下次运行的时间
     案例：
-    15m  当前时间为：12:50:51  返回时间为：13:00:00
-    15m  当前时间为：12:39:51  返回时间为：12:45:00
-    10m  当前时间为：12:38:51  返回时间为：12:40:00
     5m  当前时间为：12:33:51  返回时间为：12:35:00
-
     5m  当前时间为：12:34:51  返回时间为：12:40:00
 
-    30m  当前时间为：21日的23:33:51  返回时间为：22日的00:00:00
+    10m  当前时间为：12:38:51  返回时间为：12:40:00
 
+    15m  当前时间为：12:50:51  返回时间为：13:00:00
+    15m  当前时间为：12:39:51  返回时间为：12:45:00
+
+    30m  当前时间为：21日的23:33:51  返回时间为：22日的00:00:00
     30m  当前时间为：14:37:51  返回时间为：14:56:00
 
     1h  当前时间为：14:37:51  返回时间为：15:00:00
-
     """
+
     if time_interval.endswith('m') or time_interval.endswith('h'):
         pass
     elif time_interval.endswith('T'):
@@ -647,7 +649,9 @@ def next_run_time(time_interval, ahead_seconds=5):
         exit()
 
     ti = pd.to_timedelta(time_interval)
+
     now_time = datetime.now()
+    # print('现在时间为：%s'%now_time)
     # now_time = datetime(2019, 5, 9, 23, 50, 30)  # 修改now_time，可用于测试
     this_midnight = now_time.replace(hour=0, minute=0, second=0, microsecond=0)
     min_step = timedelta(minutes=1)
@@ -656,7 +660,10 @@ def next_run_time(time_interval, ahead_seconds=5):
 
     while True:
         target_time = target_time + min_step
+        # print('target_time: %s'%target_time)
         delta = target_time - this_midnight
+        # print((target_time - now_time).seconds)
+        # print(ahead_seconds) 
         if delta.seconds % ti.seconds == 0 and (target_time - now_time).seconds >= ahead_seconds:
             # 当符合运行周期，并且目标时间有足够大的余地，默认为60s
             break
@@ -790,7 +797,7 @@ def dingding_report_every_loop(symbol_info, symbol_signal, symbol_order, run_tim
 
     # 发送，每间隔30分钟或者有交易的时候，发送一次
     if run_time.minute % 30 == 0 or symbol_signal:
-        send_dingding_msg(content, robot_id=robot_id_secret[0], secret=robot_id_secret[1])
+        send_dingding_msg(content)
 
 
 # ===为了达到成交的目的，计算实际委托价格会向上或者向下浮动一定比例默认为0.02
@@ -856,8 +863,10 @@ n    :param secret: 你的secret，即安全设置加签当中的那个密钥
     try:
         msg = {
             "msgtype": "text",
-            "text": {"content": content + '\n' + datetime.now().strftime("%m-%d %H:%M:%S")}}
+            "text": {"content": content + '\n' + '（发送时间：' + datetime.now().strftime("%m-%d %H:%M:%S") + '）' }}
+        
         headers = {"Content-Type": "application/json;charset=utf-8"}
+
         # https://oapi.dingtalk.com/robot/send?access_token=XXXXXX&timestamp=XXX&sign=XXX
         timestamp, sign_str = cal_timestamp_sign(secret)
         url = 'https://oapi.dingtalk.com/robot/send?access_token=' + robot_id + \

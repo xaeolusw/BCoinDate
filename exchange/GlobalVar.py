@@ -47,4 +47,3 @@ OKEX_CONFIG = {
 
 # 测试时ccxt版本为1.27.28。若不是此版本，可能会报错，可能性很低。print(ccxt.__version__)可以查看ccxt版本。
 exchange = ccxt.okex(OKEX_CONFIG)
-
