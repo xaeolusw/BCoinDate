@@ -460,7 +460,7 @@ def okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal,
     # 下单参数
     params = {
         'instId': symbol_config[symbol]["instrument_id"],  # 合约代码
-        'tdMode': 'cross',  # 设置为全仓,可以调整    isolated：逐仓    cross：全仓   cash：非保证金
+        'tdMode': 'isolated',  # 设置为全仓,可以调整    isolated：逐仓    cross：全仓   cash：非保证金
         'ordType': 'limit',  # 设置为限价单
     }
 
