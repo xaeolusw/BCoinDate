@@ -4,13 +4,6 @@ from datetime import datetime
 from Function import *
 from GlobalVar import *
 
-
-pd.set_option('display.max_rows', 1000)
-pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
-# 设置命令行输出时的列对齐功能
-pd.set_option('display.unicode.ambiguous_as_wide', True)
-pd.set_option('display.unicode.east_asian_width', True)
-
 # =====配置运行相关参数=====
 # =执行的时间间隔
 time_interval = '5m'  # 目前支持5m，15m，30m，1h，2h等。得okex支持的K线才行。最好不要低于5m
@@ -48,9 +41,7 @@ def main():
         # 初始化symbol_info，在每次循环开始时都初始化
         symbol_info_columns = ['账户余额', '持仓方向', '持仓量', '持仓收益率', '持仓收益', '持仓均价', '当前价格', '最大杠杆']
         symbol_info = pd.DataFrame(index=symbol_config.keys(), columns=symbol_info_columns)  # 转化为dataframe
-        # 更新账户信息symbol_info
-        # print(symbol_info)
-        # exit()
+        
         symbol_info = update_symbol_info(exchange, symbol_info, symbol_config)
         
         print('\nsymbol_info:\n', symbol_info, '\n')

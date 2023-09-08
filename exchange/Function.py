@@ -26,6 +26,7 @@ from functools import partial
 from Config import *
 from Signals import *
 import Signals
+from GlobalVar import *
 
 
 # =====okex交互函数
@@ -503,7 +504,7 @@ def okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal,
                     exchange.private_post_trade_cancel_order(
                         {'instId': symbol_config[symbol]["instrument_id"], 'ordId': ordId})
                     if num >= max_try_amount:
-                        send_dingding_msg('下单未成交次数超过max_try_amount，终止下单，程序不退出')
+                        send_dingding_msg('下单未成交次数超过max_try_amount，终止下单，程序不退出', robot_id, secret)
                         break
                     num += 1
                     time.sleep(2)
@@ -518,7 +519,7 @@ def okex_future_place_order(exchange, symbol_info, symbol_config, symbol_signal,
                 max_try_amount -= 1
                 if max_try_amount <= 0:
                     print('下单失败次数超过max_try_amount，终止下单')
-                    send_dingding_msg('下单失败次数超过max_try_amount，终止下单，程序不退出')
+                    send_dingding_msg('下单失败次数超过max_try_amount，终止下单，程序不退出', robot_id, secret)
                     # exit() 若在子进程中（Pool）调用okex_future_place_order，触发exit会产生孤儿进程
 
     return symbol, order_id_list
@@ -797,7 +798,7 @@ def dingding_report_every_loop(symbol_info, symbol_signal, symbol_order, run_tim
 
     # 发送，每间隔30分钟或者有交易的时候，发送一次
     if run_time.minute % 30 == 0 or symbol_signal:
-        send_dingding_msg(content)
+        send_dingding_msg(content, robot_id, secret)
 
 
 # ===为了达到成交的目的，计算实际委托价格会向上或者向下浮动一定比例默认为0.02
@@ -886,5 +887,5 @@ def calculate_max_size(price, money, leverage, ratio):
 
 def send_dingding_and_raise_error(content):
     print(content)
-    send_dingding_msg(content)
+    send_dingding_msg(content, robot_id, secret)
     raise ValueError(content)
