@@ -7,7 +7,7 @@ author: 邢不行
 import pandas as pd
 import os
 import numpy as np
-from program.Config import root_path, rul_type, candle_type
+from Config import root_path, rul_type, candle_type
 from glob import glob
 
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行

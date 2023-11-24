@@ -1,0 +1,3 @@
+指标观测网址：
+创60日新高个股占比：https://www.quantclass.cn/service/stock/strategy/macro/stock-market-ltma20
+创60日新低个股占比：https://www.quantclass.cn/service/stock/strategy/macro/stock-market-ltmi20

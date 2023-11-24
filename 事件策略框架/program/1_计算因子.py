@@ -6,9 +6,8 @@ author: 邢不行
 from datetime import datetime
 from multiprocessing import cpu_count
 from joblib import Parallel, delayed
-from program.Function import *
-from program.Config import *
-
+from Function import *
+from Config import *
 
 pd.set_option('display.max_rows', 1000)
 pd.set_option('expand_frame_repr', False)  # 当列太多时不换行
@@ -63,7 +62,7 @@ if __name__ == '__main__':
     print('开始计算因子：', factor)
 
     # __import__ 动态导入模块。详情请见：https://www.runoob.com/python/python-func-__import__.html
-    cls = __import__('factor.%s' % factor, fromlist=('',))  # fromlist如果为空，导入的是factors包，所以需要给factors传入参数
+    cls = __import__('factor.%s' % factor, fromlist=('',))  # fromlist如果为空，导入的是factor包，所以需要给factor传入参数
 
     # 读取BTC一小时的数据，并且会BTC数据的空缺值进行补全。将这个数据当做指数数据
     benchmark = import_benchmark_data(candle_path % candle_type + '/BTC-USDT.csv',

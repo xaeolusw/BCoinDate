@@ -4,14 +4,14 @@ import os
 from datetime import timedelta, datetime
 from getKlinesFunction import *
 
-#定义全局变量类
-#设置代理服务器
+# 定义全局变量类
+# 设置代理服务器
 proxies = {
     'http': 'http://127.0.0.1:7890',
     'https': 'http://127.0.0.1:7890'
 }
 
-#设置币安和OKEx交易所
+# 设置币安和OKEx交易所
 global_binance_exchange = ccxt.binance({
     'proxies': proxies
 })
@@ -20,7 +20,7 @@ global_okex_exchange = ccxt.okex5({
     'proxies': proxies
 })
 
-#根据操作系统设置数据库路径
+# 根据操作系统设置数据库路径
 if os.name == 'nt':
     global_database_path = 'D:\\PythonProjects\\coin_data\\getKlinesDatabase.csv'
     global_file_path = 'D:\\PythonProjects\\coin_data'
@@ -33,8 +33,8 @@ else:
 
 global_error_list = []
 
-global_binance_symbol_list = []  #'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
-global_okx_symbol_list = []  #'BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'
+global_binance_symbol_list = []  # 'BTCUSDT','ETHUSDT','EOSUSDT','LTCUSDT'
+global_okx_symbol_list = []  # 'BTC-USDT','ETH-USDT','EOS-USDT','LTC-USDT'
 
 global_okx_instType_list = ['SWAP','FUTURES'] #SPOT：币币;SWAP：永续合约;FUTURES：交割合约;OPTION：期权
 global_okx_uly_list = ['BTC-USDT','BTC-USD']
@@ -149,34 +149,34 @@ else:
     okx_end_time = global_end_time
     okx_future_end_time = global_end_time
       
-    print(f'抓取binance{global_start_time}到{binance_end_time}的币币数据！')
+    # print(f'抓取binance{global_start_time}到{binance_end_time}的币币数据！')
 
-    # get_binance_klines(global_binance_exchange, 'BTCUSDT', '5m', global_start_time, binance_end_time, global_instType, global_file_path)
-    # exit()
-    while global_start_time < binance_end_time :
-        temp_time = str(pd.to_datetime(binance_end_time) - timedelta(days=30))
+    # # get_binance_klines(global_binance_exchange, 'BTCUSDT', '5m', global_start_time, binance_end_time, global_instType, global_file_path)
+    # # exit()
+    # while global_start_time < binance_end_time :
+    #     temp_time = str(pd.to_datetime(binance_end_time) - timedelta(days=30))
 
-        if temp_time > global_start_time :
-            for symbol in global_binance_symbol_list:
-                for time_interval in global_time_interval_list:
-                    try:
-                        get_binance_klines(global_binance_exchange, symbol, time_interval, temp_time, binance_end_time, global_instType, global_file_path)
-                    except Exception as e:
-                        print(e)
-                        global_error_list.append([symbol, time_interval, temp_time, binance_end_time])
-            binance_end_time = temp_time
-        else:
-            for symbol in global_binance_symbol_list:
-                for time_interval in global_time_interval_list:
-                    try:
-                        get_binance_klines(global_binance_exchange, symbol, time_interval, global_start_time, binance_end_time, global_instType, global_file_path)
-                    except Exception as e:
-                        print(e)
-                        global_error_list.append([symbol, time_interval, global_start_time, binance_end_time])
-            break
+    #     if temp_time > global_start_time :
+    #         for symbol in global_binance_symbol_list:
+    #             for time_interval in global_time_interval_list:
+    #                 try:
+    #                     get_binance_klines(global_binance_exchange, symbol, time_interval, temp_time, binance_end_time, global_instType, global_file_path)
+    #                 except Exception as e:
+    #                     print(e)
+    #                     global_error_list.append([symbol, time_interval, temp_time, binance_end_time])
+    #         binance_end_time = temp_time
+    #     else:
+    #         for symbol in global_binance_symbol_list:
+    #             for time_interval in global_time_interval_list:
+    #                 try:
+    #                     get_binance_klines(global_binance_exchange, symbol, time_interval, global_start_time, binance_end_time, global_instType, global_file_path)
+    #                 except Exception as e:
+    #                     print(e)
+    #                     global_error_list.append([symbol, time_interval, global_start_time, binance_end_time])
+    #         break
 
     # =====选择开始、结束时间抓取数据
-    print(f'抓取okx{global_start_time}到{binance_end_time}的币币数据！')
+    print(f'抓取okx{global_start_time}到{okx_end_time}的币币数据！')
 
     while global_start_time < okx_end_time :
         temp_time = str(pd.to_datetime(okx_end_time) - timedelta(days=1))

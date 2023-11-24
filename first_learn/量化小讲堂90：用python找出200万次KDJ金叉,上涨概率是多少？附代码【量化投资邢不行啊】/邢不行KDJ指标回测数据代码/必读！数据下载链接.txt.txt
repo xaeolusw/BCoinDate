@@ -1,0 +1,4 @@
+链接：https://pan.baidu.com/s/1WcgvPT2gdAqw_8BQhNix9A 
+提取码：8n3w 
+
+下载数据后，将数据放至   邢不行技术指标计算代码 文件夹内，读取数据文件夹路径即可。
