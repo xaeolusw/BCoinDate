@@ -21,7 +21,7 @@ def main():
         global_update_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
         global_end_time = global_update_time + ' 23:59:59'
         print(f'开始更新{global_start_time}至{global_end_time}的数据。')
-    exit()
+   
 
     binance_end_time = global_end_time
     #     okx_end_time = global_end_time
